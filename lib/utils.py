@@ -59,7 +59,7 @@ def load_dataset(source_path, processor, refresh=False):
     if os.path.isdir('data/hfdata/train.hf') and os.path.isdir('data/hfdata/eval.hf') and not refresh:
         return load_from_disk('data/hfdata/train.hf'), load_from_disk('data/hfdata/eval.hf')
     else:
-        ds = pd.read_csv(source_path)
+        ds = pd.read_csv(f"{source_path}/dataset_nlp.csv")
 
         train_data = {'input_values': [], 'labels': [], 'input_length': []}
         eval_data = {'input_values': [], 'labels': [], 'input_length': []}
@@ -72,7 +72,7 @@ def load_dataset(source_path, processor, refresh=False):
                 if j <= 5:  # to Train 1-5
                     to_expand = train_data
 
-                waveform, sr = librosa.load(f'data/DATASET_NLP/mp3/{fname}/{fname}_{j}.mp3', sr=16000)
+                waveform, sr = librosa.load(f'{source_path}/mp3/{fname}/{fname}_{j}.mp3', sr=16000)
                 waveform = processor(waveform, sampling_rate=16000).input_values[0]
 
                 with processor.as_target_processor():
