@@ -4,6 +4,7 @@ import librosa
 import pandas as pd
 import torch
 from datasets import load_from_disk, Dataset
+import os
 
 
 class DataCollatorCTCWithPadding:
@@ -53,11 +54,11 @@ class DataCollatorCTCWithPadding:
         return batch
 
 
-def load_dataset(source_path=None, processor=None, train_file=None, eval_file=None):
-    if train_file is not None and eval_file is not None:
-        return load_from_disk(train_file), load_from_disk(eval_file)
-    elif source_path is not None and processor is not None:
-
+def load_dataset(source_path, processor, refresh=False):
+    # check if processed data already exists
+    if os.path.isdir('data/hfdata/train.hf') and os.path.isdir('data/hfdata/eval.hf') and not refresh:
+        return load_from_disk('data/hfdata/train.hf'), load_from_disk('data/hfdata/eval.hf')
+    else:
         ds = pd.read_csv(source_path)
 
         train_data = {'input_values': [], 'labels': [], 'input_length': []}
@@ -82,11 +83,9 @@ def load_dataset(source_path=None, processor=None, train_file=None, eval_file=No
 
         train = Dataset.from_dict(train_data)
         valid = Dataset.from_dict(eval_data)
-        train.save_to_disk('data/train.hf')
-        valid.save_to_disk('data/eval.hf')
+        train.save_to_disk('data/hfdata/train.hf')
+        valid.save_to_disk('data/hfdata/eval.hf')
         return train, valid
-    else:
-        return None
 
 
 def record_audio(time=5, sr=16000):

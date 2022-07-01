@@ -4,7 +4,7 @@ import numpy as np
 from datasets import load_metric
 from transformers import Wav2Vec2ForCTC, Wav2Vec2FeatureExtractor, Wav2Vec2CTCTokenizer
 from transformers import Wav2Vec2Processor, TrainingArguments, IntervalStrategy, Trainer
-from utils import *
+from lib.utils import *
 
 
 # %% INITIALIZE PROCESSOR
@@ -21,9 +21,9 @@ processor = Wav2Vec2Processor(
 data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
 
 # %% PROCESS DATASET
+# se hai già il file:
+train_data, eval_data = load_dataset('data/DATASET_NLP',processor)
 
-train_data, eval_data = load_dataset(train_file='data/train.hf',
-                                     eval_file='data/eval.hf')
 
 # %% DEFINE METRICS
 
