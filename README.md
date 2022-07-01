@@ -11,8 +11,7 @@ if you want to generate the LM by yourself
 #### ASR fine tuning:
 
 1) create python 3.8 virtualenv with requirements
-2) get the dataset form: "inserisci url" you should have a data/DATASET_NLP 
-folder with csv and mp3 folder 
+2) untar DATASET_NLP.tar.gz in a folder named data
 3) run fine tuning notebook. this will get you a models/wav2vec2 folder with torch model
 
 #### LM generation:
