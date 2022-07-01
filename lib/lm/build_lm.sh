@@ -1,8 +1,8 @@
 #!/bin/bash
-./kenlm/build/bin/lmplz -o 5 -S 40% <"../../data/lm/corpus.txt" >"../../models/lm/temp.arpa"
+./kenlm/build/bin/lmplz -o 5 -S 40% <"../../data/lm/corpus.txt" >"temp.arpa"
 
 PYCMD=$(cat <<EOF
-with open("../../models/lm/temp.arpa", "r") as read_file, open("../../models/lm/lm.arpa", "w") as write_file:
+with open("temp.arpa", "r") as read_file, open("../../models/lm/lm.arpa", "w") as write_file:
   print('starting conversion')
   has_added_eos = False
   for line in read_file:
@@ -20,4 +20,4 @@ EOF
 )
 
 python3 -c "$PYCMD"
-rm "../../models/lm/temp.arpa"
+rm "temp.arpa"
