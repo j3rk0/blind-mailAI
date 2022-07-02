@@ -43,7 +43,7 @@ intents = [{0: ['inviare', 'mandare', 'spedire'],
 
            {0: ['invia', 'manda', 'spedisci'],
             1: ['cerca', 'leggi', 'cerchi'],
-            2: ['leggila', ],
+            2: ['leggila'],
             3: ['cancella', 'elimina', 'cancellala', 'eliminala'],
             4: ['rispondi', 'rispondigli'],
             5: ['inoltra', 'inoltrala'],
@@ -61,30 +61,22 @@ person_conj = {0: 'a',
                5: 'a'}
 per_conj_tag = ['O']
 
-persons = ['Gianluca Magalli', 'Pietro Pisani', 'Jessica esposito', 'marco rossi', 'giuseppe esposito', 'fulvio camera',
-           'riccardo arnese', 'sabrina mennella', 'vincenzo desimone']
+persons = ['Gianluca Magalli', 'Pietro Pisani', 'Jessica esposito', 'marco rossi']
 
 person_tag = ['B-PER', 'I-PER']
 
 obj_conj = 'con ogetto'
 obj_conj_tag = ['O', 'O']
 
-objects = ['comunicazione importante', 'ordine del giorno', 'richiesta modulo', 'consegna progetto',
-           'conferma invito', 'attivazione profilo']
-objects_tag = [['B-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ'],
-               ['B-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ']]
+objects = ['comunicazione importante', 'ordine del giorno', 'richiesta modulo']
+objects_tag = [['B-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ']]
 
 date_conj = ['ricevute', 'di']
 date_conj_tag = ['O']
 
-dates = ['il tredici aprile', 'il quindici maggio', 'a marzo', 'a luglio', 'questo mese', 'questa settimana',
-         'ieri', 'oggi']
-dates_tag = [['O', 'B-TIME', 'I-TIME'], ['O', 'B-TIME', 'I-TIME'], ['O', 'B-TIME'], ['O', 'B-TIME'],
-             ['B-TIME', 'I-TIME'],
-             ['B-TIME', 'I-TIME'], ['B-TIME'], ['B-TIME']]
-# ricorda "di il" va stotituito con 'del'
-
-# %%
+dates = ['il tredici aprile', 'a marzo', 'questo mese', 'oggi']
+dates_tag = [['O', 'B-TIME', 'I-TIME'], ['O', 'B-TIME'], ['O', 'B-TIME'],
+             ['B-TIME']]
 
 sentences_array = []
 intent_array = []
@@ -94,9 +86,8 @@ for prefix_type in range(len(prefixes)):
     for prefix_index in range(len(prefixes[prefix_type])):
         pref = prefixes[prefix_type][prefix_index]
         pref_tag = prefix_tag[prefix_type][prefix_index]
-        for curr_intent in range(6):
+        for curr_intent in range(7):
             for intent_str in intents[prefix_type][curr_intent]:
-
                 if curr_intent not in [0, 1, 5]:  # INTENT WITHOUT SLOTS
                     sentences_array.append(f"{pref}{intent_str}")
                     intent_array.append(curr_intent)
@@ -254,9 +245,15 @@ for prefix_type in range(len(prefixes)):
 for i in range(len(sentences_array)):
     sentences_array[i] = sentences_array[i].replace('di il', 'del').replace('di a', 'di')
 
-# %%
-
 import pandas as pd
 
 df = pd.DataFrame.from_dict({'text': sentences_array, 'entities': slot_array, 'intent': intent_array})
 df.to_csv('data/ner_dataset.csv')
+print('done!')
+
+# %%
+
+n_intent = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+
+for intent in intent_array:
+    n_intent[intent] += 1
