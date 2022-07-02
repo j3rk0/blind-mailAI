@@ -207,40 +207,40 @@ for prefix_type in range(len(prefixes)):
                                     slot_array.append(pref_tag + intent_tag + coj_tag +
                                                       date_conj_tag + dates_tag[date_index])
 
-                                # DATES + PERSONS
-                                for per in persons:
-                                    sentences_array.append(
-                                        f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per}")
-                                    intent_array.append(curr_intent)
-                                    slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                                      dates_tag[date_index] + per_conj_tag + person_tag)
+                                    # DATES + PERSONS
+                                    for per in persons:
+                                        sentences_array.append(
+                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per}")
+                                        intent_array.append(curr_intent)
+                                        slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
+                                                          dates_tag[date_index] + per_conj_tag + person_tag)
 
-                                    # DATES + PERSONS + OBJECTS
+                                        # DATES + PERSONS + OBJECTS
+                                        for obj_index in range(len(objects)):
+                                            sentences_array.append(
+                                                f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per} {obj_conj} {objects[obj_index]}")
+                                            intent_array.append(curr_intent)
+                                            slot_array.append(
+                                                pref_tag + intent_tag + coj_tag + date_conj_tag +
+                                                dates_tag[date_index] + per_conj_tag + person_tag +
+                                                obj_conj_tag + objects_tag[obj_index])
+                                    # DATES + OBJECTS
                                     for obj_index in range(len(objects)):
                                         sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per} {obj_conj} {objects[obj_index]}")
+                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]}")
                                         intent_array.append(curr_intent)
                                         slot_array.append(
                                             pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                            dates_tag[date_index] + per_conj_tag + person_tag +
-                                            obj_conj_tag + objects_tag[obj_index])
-                                # DATES + OBJECTS
-                                for obj_index in range(len(objects)):
-                                    sentences_array.append(
-                                        f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]}")
-                                    intent_array.append(curr_intent)
-                                    slot_array.append(
-                                        pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                        dates_tag[date_index] + obj_conj_tag + objects_tag[obj_index])
+                                            dates_tag[date_index] + obj_conj_tag + objects_tag[obj_index])
 
-                                    # DATES + OBJECT + PERSON
-                                    for per in persons:
-                                        sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]} {person_conj[curr_intent]} {per}")
-                                        intent_array.append(curr_intent)
-                                        slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                                          dates_tag[date_index] + obj_conj_tag +
-                                                          objects_tag[obj_index] + per_conj_tag + person_tag)
+                                        # DATES + OBJECT + PERSON
+                                        for per in persons:
+                                            sentences_array.append(
+                                                f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]} {person_conj[curr_intent]} {per}")
+                                            intent_array.append(curr_intent)
+                                            slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
+                                                              dates_tag[date_index] + obj_conj_tag +
+                                                              objects_tag[obj_index] + per_conj_tag + person_tag)
                 else:  # INTENT 5
                     sentences_array.append(f"{pref}{intent_str}")
                     intent_array.append(curr_intent)
