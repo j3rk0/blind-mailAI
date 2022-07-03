@@ -6,4 +6,4 @@ cmake ..
 make -j2
 cd ..
 source ../../../venv/bin/activate
-pip install -e .
+python -m pip install -e .

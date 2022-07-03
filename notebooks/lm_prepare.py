@@ -1,8 +1,6 @@
 import os, sys
-os.environ['KENLM_ROOT'] = f"{os.getcwd()}/lib/lm/kenlm"
-os.environ['KENLM_ROOT_DIR'] = f"{os.getcwd()}/lib/lm/kenlm"
 import torch
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, Wav2Vec2ProcessorWithLM
 from lib.utils import record_audio
 from pyctcdecode import build_ctcdecoder
 
@@ -20,8 +18,11 @@ sorted_vocab_dict = {k.lower(): v for k, v in sorted(vocab_dict.items(), key=lam
 
 decoder = build_ctcdecoder(
     labels=list(sorted_vocab_dict.keys()),
-    kenlm_model_path="models/lm/lm.fixed.arpa",
+    kenlm_model_path="models/lm/lm.arpa",
 )
+#%%
+processor_with_lm = Wav2Vec2ProcessorWithLM(  feature_extractor=processor.feature_extractor,tokenizer=processor.tokenizer,
+                                              decoder=decoder)
 
 # %% INITIALIZE MODEL
 
@@ -33,7 +34,7 @@ waveform = record_audio()  # record live
 
 # %% PROCESS INPUT AND INFER
 
-inputs = processor(waveform, sampling_rate=16000, return_tensor='pt', padding=True)
+inputs = processor_with_lm(waveform, sampling_rate=16000, return_tensor='pt', padding=True)
 input_values = torch.FloatTensor(inputs.input_values)
 attention_mask = torch.LongTensor(inputs.attention_mask)
 logits = model(input_values, attention_mask).logits

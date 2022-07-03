@@ -1,5 +1,5 @@
 #!/bin/bash
-./kenlm/build/bin/lmplz -o 5 -S 40% <"../../data/lm/corpus.txt" >"temp.arpa"
+./kenlm/build/bin/lmplz -o 5 -S 60% <"../../data/lm/corpus.txt" >"temp.arpa"
 
 PYCMD=$(cat <<EOF
 with open("temp.arpa", "r") as read_file, open("../../models/lm/lm.arpa", "w") as write_file:
@@ -20,4 +20,4 @@ EOF
 )
 
 python3 -c "$PYCMD"
-rm "temp.arpa"
+rm temp.arpa
