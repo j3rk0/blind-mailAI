@@ -12,248 +12,243 @@ intent:
 ------------------
 entities:
 
-outside
-b-per
-i-per
-b-obj
-i-obj
-b-time
-i-time
+O: outside
+b-per: inzio slot persona
+i-per: interno slot persona
+b-obj: inizio slot oggetto
+i-obj: interno slot oggetto
+b-date: inizio slot data
+i-date: interno slot data
 ---------------------
 """
 
-prefixes = [['potresti ', 'vorresti '], ['vorrei ', 'voglio '], ['']]
-prefix_tag = [[['O'], ['O']], [['O'], ['O']], [[]]]
-
-intents = [{0: ['inviare', 'mandare', 'spedire'],
-            1: ['cercarmi', 'leggermi', 'cercare', 'leggere'],
-            2: ['leggerla', 'leggermela'],
-            3: ['cancellare', 'eliminare', 'cancellarla', 'eliminarla'],
-            4: ['rispondere', 'rispondergli'],
-            5: ['inoltrare', 'inoltrarla'],
-            6: ['chiudere', 'chiuderla']},
-
-           {0: ['inviare', 'mandare', 'spedire'],
-            1: ['cercare', 'leggere'],
-            2: ['leggerla', ],
-            3: ['cancellare', 'eliminare', 'cancellarla', 'eliminarla'],
-            4: ['rispondere', 'rispondergli'],
-            5: ['inoltrare', 'inoltrarla'],
-            6: ['chiudere', 'chiuderla']},
-
-           {0: ['invia', 'manda', 'spedisci'],
-            1: ['cerca', 'leggi', 'cerchi'],
-            2: ['leggila'],
-            3: ['cancella', 'elimina', 'cancellala', 'eliminala'],
-            4: ['rispondi', 'rispondigli'],
-            5: ['inoltra', 'inoltrala'],
-            6: ['chiudi', 'chiudila']}
-           ]
-
-intent_tag = ['O']
-
-cojs = {0: ['una mail', 'un messaggio'], 1: ['le mail', 'i messaggi']}
-
-coj_tag = ['O', 'O']
-
-person_conj = {0: 'a',
-               1: 'da',
-               5: 'a'}
-per_conj_tag = ['O']
-
-persons = ['Gianluca Magalli', 'Pietro Pisani', 'Jessica esposito', 'marco rossi']
-
-person_tag = ['B-PER', 'I-PER']
-
-obj_conj = 'con ogetto'
-obj_conj_tag = ['O', 'O']
-
-objects = ['comunicazione importante', 'ordine del giorno', 'richiesta modulo']
-objects_tag = [['B-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ', 'I-OBJ'], ['B-OBJ', 'I-OBJ']]
-
-date_conj = ['ricevute', 'di']
-date_conj_tag = ['O']
-
-dates = ['il tredici aprile', 'a marzo', 'questo mese', 'oggi']
-dates_tag = [['O', 'B-TIME', 'I-TIME'], ['O', 'B-TIME'], ['O', 'B-TIME'],
-             ['B-TIME']]
-
-sentences_array = []
-intent_array = []
-slot_array = []
-
-for prefix_type in range(len(prefixes)):
-    for prefix_index in range(len(prefixes[prefix_type])):
-        pref = prefixes[prefix_type][prefix_index]
-        pref_tag = prefix_tag[prefix_type][prefix_index]
-        for curr_intent in range(7):
-            for intent_str in intents[prefix_type][curr_intent]:
-                if curr_intent not in [0, 1, 5]:  # INTENT WITHOUT SLOTS
-                    sentences_array.append(f"{pref}{intent_str}")
-                    intent_array.append(curr_intent)
-                    slot_array.append(pref_tag + intent_tag)
-                elif curr_intent in [0, 1]:
-                    for coj in cojs[curr_intent]:
-                        # NO SLOTS
-                        sentences_array.append(f"{pref}{intent_str} {coj}")
-                        intent_array.append(curr_intent)
-                        slot_array.append(pref_tag + intent_tag + coj_tag)
-
-                        # ONLY PERSONS
-                        for per in persons:
-                            sentences_array.append(f"{pref}{intent_str} {coj} {person_conj[curr_intent]} {per}")
-                            intent_array.append(curr_intent)
-                            slot_array.append(pref_tag + intent_tag + coj_tag + per_conj_tag + person_tag)
-
-                            # PERSONS + OBJECT
-                            for obj_index in range(len(objects)):
-                                sentences_array.append(
-                                    f"{pref}{intent_str} {coj} {person_conj[curr_intent]} {per} {obj_conj} {objects[obj_index]}")
-                                intent_array.append(curr_intent)
-                                slot_array.append(
-                                    pref_tag + intent_tag + coj_tag + per_conj_tag + person_tag + obj_conj_tag +
-                                    objects_tag[obj_index])
-
-                                # PERSONS + OBJECT + DATE
-                                if curr_intent == 1:
-                                    for dconj in date_conj:
-                                        for date_index in range(len(dates)):
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj} {person_conj[curr_intent]} {per} {obj_conj} {objects[obj_index]} {dconj} {dates[date_index]}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(
-                                                pref_tag + intent_tag + coj_tag + per_conj_tag + person_tag + coj_tag +
-                                                objects_tag[obj_index] + date_conj_tag + dates_tag[date_index])
-
-                            # PERSONS + DATES
-                            if curr_intent == 1:
-                                for dconj in date_conj:
-                                    for date_index in range(len(dates)):
-                                        sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {person_conj[curr_intent]} {per} {dconj} {dates[date_index]}")
-                                        intent_array.append(curr_intent)
-                                        slot_array.append(pref_tag + intent_tag + coj_tag + per_conj_tag + person_tag +
-                                                          date_conj_tag + dates_tag[date_index])
-
-                                        # PERSONS + DATE + OBJECT
-                                        for obj_index in range(len(objects)):
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj} {person_conj[curr_intent]} {per} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(
-                                                pref_tag + intent_tag + coj_tag + per_conj_tag + person_tag +
-                                                date_conj_tag + dates_tag[date_index] + obj_conj_tag +
-                                                objects_tag[obj_index])
-
-                        # ONLY OBJECTS
-                        for obj_index in range(len(objects)):
-                            sentences_array.append(f"{pref}{intent_str} {coj} {obj_conj} {objects[obj_index]}")
-                            intent_array.append(curr_intent)
-                            slot_array.append(pref_tag + intent_tag + coj_tag + obj_conj_tag + objects_tag[obj_index])
-
-                            # OBJECT + PERSON
-                            for per in persons:
-                                sentences_array.append(
-                                    f"{pref}{intent_str} {coj} {obj_conj} {objects[obj_index]} {person_conj[curr_intent]} {per}")
-                                intent_array.append(curr_intent)
-                                slot_array.append(pref_tag + intent_tag + coj_tag + obj_conj_tag +
-                                                  objects_tag[obj_index] + per_conj_tag + person_tag)
-                                # OBJECT + PERSONS + DATE
-                                if curr_intent == 1:
-                                    for dconj in date_conj:
-                                        for date_index in range(len(dates)):
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj} {obj_conj} {objects[obj_index]} {person_conj[curr_intent]} {per} {dconj} {dates[date_index]}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(pref_tag + intent_tag + coj_tag + obj_conj_tag +
-                                                              objects_tag[obj_index] + per_conj_tag + person_tag +
-                                                              date_conj_tag + dates_tag[date_index])
-
-                            # OBJECT + DATE
-                            if curr_intent == 1:
-                                for dconj in date_conj:
-                                    for date_index in range(len(dates)):
-                                        sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {obj_conj} {objects[obj_index]} {dconj} {dates[date_index]}")
-                                        intent_array.append(curr_intent)
-                                        slot_array.append(pref_tag + intent_tag + coj_tag +
-                                                          obj_conj_tag +
-                                                          objects_tag[obj_index] +
-                                                          date_conj_tag + dates_tag[date_index])
-                                        # OBJECT + DATE + PERSONS
-                                        for per in persons:
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj}  {obj_conj} {objects[obj_index]} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(pref_tag + intent_tag + coj_tag + obj_conj_tag +
-                                                              date_conj_tag + dates_tag[date_index] +
-                                                              objects_tag[obj_index] + per_conj_tag + person_tag)
-
-                        # ONLY DATES
-                        if curr_intent == 1:
-                            for dconj in date_conj:
-                                for date_index in range(len(dates)):
-                                    sentences_array.append(f"{pref}{intent_str} {coj} {dconj} {dates[date_index]}")
-                                    intent_array.append(curr_intent)
-                                    slot_array.append(pref_tag + intent_tag + coj_tag +
-                                                      date_conj_tag + dates_tag[date_index])
-
-                                    # DATES + PERSONS
-                                    for per in persons:
-                                        sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per}")
-                                        intent_array.append(curr_intent)
-                                        slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                                          dates_tag[date_index] + per_conj_tag + person_tag)
-
-                                        # DATES + PERSONS + OBJECTS
-                                        for obj_index in range(len(objects)):
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {person_conj[curr_intent]} {per} {obj_conj} {objects[obj_index]}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(
-                                                pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                                dates_tag[date_index] + per_conj_tag + person_tag +
-                                                obj_conj_tag + objects_tag[obj_index])
-                                    # DATES + OBJECTS
-                                    for obj_index in range(len(objects)):
-                                        sentences_array.append(
-                                            f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]}")
-                                        intent_array.append(curr_intent)
-                                        slot_array.append(
-                                            pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                            dates_tag[date_index] + obj_conj_tag + objects_tag[obj_index])
-
-                                        # DATES + OBJECT + PERSON
-                                        for per in persons:
-                                            sentences_array.append(
-                                                f"{pref}{intent_str} {coj} {dconj} {dates[date_index]} {obj_conj} {objects[obj_index]} {person_conj[curr_intent]} {per}")
-                                            intent_array.append(curr_intent)
-                                            slot_array.append(pref_tag + intent_tag + coj_tag + date_conj_tag +
-                                                              dates_tag[date_index] + obj_conj_tag +
-                                                              objects_tag[obj_index] + per_conj_tag + person_tag)
-                else:  # INTENT 5
-                    sentences_array.append(f"{pref}{intent_str}")
-                    intent_array.append(curr_intent)
-                    slot_array.append(pref_tag + intent_tag)
-
-                    for per in persons:
-                        sentences_array.append(f"{pref}{intent_str} {person_conj[curr_intent]} {per}")
-                        intent_array.append(curr_intent)
-                        slot_array.append(pref_tag + intent_tag + per_conj_tag + person_tag)
-
-for i in range(len(sentences_array)):
-    sentences_array[i] = sentences_array[i].replace('di il', 'del').replace('di a', 'di')
+import random
 
 import pandas as pd
 
-df = pd.DataFrame.from_dict({'text': sentences_array, 'entities': slot_array, 'intent': intent_array})
-df.to_csv('data/ner_dataset.csv')
-print('done!')
+
+def get_random_object():
+    conj = ' con ogetto'
+
+    ret_text = ['informazioni ricevimento', 'elezioni studentesche', 'Posticipo incontro',
+                'Firme per la partecipazione al corso di informatica', 'Ritiro attestato',
+                'Problema accesso sito universitario', 'Promemoria', 'info su prescrizione medica',
+                'Assistenza tecnica', 'Reclamo e richiesta di assistenza', 'Candidatura spontanea',
+                'comunicazione importante', 'ordine del giorno', 'richiesta modulo', 'consegna progetto',
+                'conferma invito', 'attivazione profilo'][random.randint(0, 15)].lower()
+
+    ret_slot = ['O', 'O', 'B-OBJ'] + ['I-OBJ'] * (len(ret_text.split(' ')) - 1)
+
+    return f"{conj} {ret_text}", ret_slot
+
+
+with open('data/italian_names.csv') as f:
+    names = [name.replace('\n', '').replace(',', ' ') for name in f.readlines()]
+
+
+def get_random_person(to=True):
+    name = names[random.randint(0, len(names) - 1)]
+
+    conj = ['da', 'di', 'inviate da', 'con mittente'][random.randint(0, 3)]
+    if to:
+        conj = ['a', 'per', 'con destinatario'][random.randint(0, 2)]
+        if name.lower()[0] in ['a', 'e', 'i', 'o', 'u'] and conj == 'a':
+            conj = 'ad'
+
+    return f" {conj} {name.lower()}", ['O'] * len(conj.split(' ')) + ['B-PER', 'I-PER']
+
+
+def get_random_date():
+    ret_text = ''
+    ret_slots = []
+    type = ['exact', 'relative', 'month'][random.randint(0, 2)]
+
+    if type == 'exact':
+
+        conj = ['ricevute il', 'del', 'con data'][random.randint(0, 2)]
+        day = ['primo', 'due', 'tre', 'quattro', 'cingue', 'sei', 'sette', 'otto', 'nove', 'dieci',
+               'undici', 'dodici', 'tredici', 'quattordici', 'quindici', 'sedici', 'diciasette',
+               'diciotto', 'diciannove', 'venti', 'ventuno', 'ventidue', 'ventitre', 'ventiquattro',
+               'venticinque', 'ventisei', 'ventisette', 'ventotto', 'ventinove', 'trenta',
+               'trentuno'][random.randint(0, 30)]
+        month = ['gennaio', 'febbraio', 'marzo', 'aprile',
+                 'maggio', 'giugno', 'luglio', 'agosto',
+                 'settembre', 'ottobre', 'novembre', 'dicembre'][random.randint(0, 11)]
+        ret_text = f"{conj} {day} {month}"
+        ret_slots = ['O'] * len(conj.split(' ')) + ['B-DATE', 'I-DATE']
+    elif type == 'relative':
+        ret_text, ret_slots = [('di questo mese', ['O', 'B-DATE', 'I-DATE']),
+                               ('ricevute questo mese', ['O', 'B-DATE', 'I-DATE']),
+                               ('del mese scorso', ['O', 'B-DATE', 'I-DATE']),
+                               ('ricevute il mese scorso', ['O', 'O', 'B-DATE', 'I-DATE']),
+                               ('di questa settimana', ['O', 'B-DATE', 'I-DATE']),
+                               ('ricevute questa settimana', ['O', 'B-DATE', 'I-DATE']),
+                               ('della settimana scorsa', ['O', 'B-DATE', 'I-DATE']),
+                               ('ricevute la settimana scorsa', ['O', 'O', 'B-DATE', 'I-DATE']),
+                               ('di oggi', ['O', 'B-DATE']),
+                               ('ricevute oggi', ['O', 'B-DATE']),
+                               ('di ieri', ['O', 'B-DATE']),
+                               ('ricevute ieri', ['O', 'B-DATE'])][random.randint(0, 11)]
+    elif type == 'month':
+        pref = ['ricevute a', 'di'][random.randint(0, 1)]
+        month = ['gennaio', 'febbraio', 'marzo', 'aprile',
+                 'maggio', 'giugno', 'luglio', 'agosto',
+                 'settembre', 'ottobre', 'novembre', 'dicembre'][random.randint(0, 11)]
+        ret_text = f"{pref} {month}"
+        ret_slots = ['O'] * len(pref.split(' ')) + ['B-DATE']
+    return f" {ret_text}", ret_slots
+
+
+def compose_sentence(intent):
+    ret_text, ret_slots = "", None
+    if intent == 0:
+
+        if random.randint(1, 7) <= 4:
+            ret_text = ['potresti', 'vorresti', 'voglio', 'puoi'][random.randint(0, 1)] + \
+                       " " + ['inviare', 'mandare', 'spedire'][random.randint(0, 2)] + \
+                       " " + ['una mail', 'un messaggio'][random.randint(0, 1)]
+            ret_slots = ['O', 'O', 'O', 'O']
+        else:
+            ret_text = ['invia', 'manda', 'spedisci'][random.randint(0, 2)] + ' ' + \
+                       ['una mail', 'un messaggio'][random.randint(0, 1)]
+            ret_slots = ['O', 'O', 'O']
+
+        additional_slots = [['obj'], ['obj', 'per'], ['per'], ['per', 'obj'], []][random.randint(0, 4)]
+
+        text_to_add, slot_to_add = '', []
+        for slot in additional_slots:
+            if slot == 'obj':
+                text_to_add, slot_to_add = get_random_object()
+            elif slot == 'per':
+                text_to_add, slot_to_add = get_random_person()
+            ret_text += text_to_add
+            ret_slots += slot_to_add
+
+    elif intent == 1:
+
+        n = random.randint(0, 2)
+
+        if n == 0:
+            ret_text = ['potresti', 'vorresti'][random.randint(0, 1)] + ' ' + \
+                       ['cercarmi', 'leggermi', 'cercare', 'leggere'][random.randint(0, 3)] + ' ' + \
+                       ['le mail', 'i messaggi'][random.randint(0, 1)]
+            ret_slots = ['O', 'O', 'O', 'O']
+
+        elif n == 1:
+            ret_text = ['vorrei', 'voglio'][random.randint(0, 1)] + ' ' + \
+                       ['cercare', 'leggere'][random.randint(0, 1)] + ' ' + \
+                       ['delle mail', 'dei messaggi', 'le mail', 'i messaggi'][random.randint(0, 1)]
+            ret_slots = ['O', 'O', 'O', 'O']
+        else:
+            ret_text = ['cerca', 'leggi', 'cerchi'][random.randint(0, 2)] + ' ' + \
+                       ['le mail', 'i messaggi'][random.randint(0, 1)]
+
+            ret_slots = ['O', 'O', 'O']
+
+        slots = ['obj', 'per', 'date', 'no']
+
+        additional_slots = [[t1, t2, t3] for t1 in slots for t2 in slots for t3 in slots
+                            if (t1 != 'no' and t2 == 'no' and t3 == 'no') or
+                            (t1 != 'no' and t2 != 'no' and t3 == 'no' and t1 != t2) or
+                            (t1 != 'no' and t2 != 'no' and t3 != 'no' and t1 != t2 and t2 != t3 and t3 != t1)]
+
+        additional_slots = additional_slots[random.randint(0, len(additional_slots) - 1)]
+        for slot in additional_slots:
+            text_to_add, slot_to_add = '', []
+            if slot == 'obj':
+                text_to_add, slot_to_add = get_random_object()
+            elif slot == 'per':
+                text_to_add, slot_to_add = get_random_person(to=False)
+            elif slot == 'date':
+                text_to_add, slot_to_add = get_random_date()
+
+            ret_text += text_to_add
+            ret_slots += slot_to_add
+
+    elif intent == 2:
+
+        n = random.randint(0, 2)
+        if n == 0:
+            ret_text = ['potresti ', 'vorresti '][random.randint(0, 1)] + ' ' + \
+                       ['leggerla', 'leggermela'][random.randint(0, 1)]
+        elif n == 1:
+            ret_text = ['vorrei', 'voglio'][random.randint(0, 1)] + ' ' + \
+                       ['leggerla', 'leggere la mail', 'leggere il messaggio'][random.randint(0, 2)]
+        else:
+            ret_text = ['leggila', 'leggi', 'leggimela', 'leggimi la mail',
+                        'leggimi il messaggio', 'leggi la mail', 'leggi il messaggio'][random.randint(0, 4)]
+
+        ret_slots = ['O'] * len(ret_text.split(' '))
+    elif intent == 3:
+        if random.randint(0, 1) == 0:
+            ret_text = ['potresti', 'vorresti', 'vorrei', 'voglio'][random.randint(0, 3)] + ' ' + \
+                       ['cancellare la mail', 'cancellare il messaggio', 'eliminare la mail', 'cancellarla',
+                        'eliminare il messaggio', 'eliminarla'][random.randint(0, 5)]
+        else:
+            ret_text = ['cancella', 'cancella la mail', 'cancella il messaggio', 'elimina', 'elimina la mail',
+                        'elimina il messaggio', 'cancellala', 'eliminala'][random.randint(0, 7)]
+
+        ret_slots = ['O'] * len(ret_text.split(' '))
+    elif intent == 4:
+        if random.randint(0, 1) == 0:
+            ret_text = ['potresti', 'vorresti', 'vorrei', 'voglio'][random.randint(0, 3)] + ' ' + \
+                       ['rispondere', 'rispondere alla mail', 'rispondere al messaggio', 'rispondergli'][
+                           random.randint(0, 3)]
+        else:
+            ret_text = ['rispondi', 'rispondi alla mail', 'rispondi al messaggio', 'rispondigli'][random.randint(0, 3)]
+
+        ret_slots = ['O'] * len(ret_text.split(' '))
+    elif intent == 5:
+        if random.randint(0, 1) == 0:
+            ret_text = ['potresti', 'vorresti', 'vorrei', 'voglio'][random.randint(0, 3)] + ' ' + \
+                       ['inoltrare', 'inoltrare la mail', 'inoltrare il messaggio', 'inoltrarla'][random.randint(0, 3)]
+        else:
+            ret_text = ['inoltra', 'inoltra la mail', 'inoltra il messaggio', 'inoltrala'][random.randint(0, 3)]
+
+        ret_slots = ['O'] * len(ret_text.split(' '))
+
+        text_to_add, slot_to_add = get_random_person()
+        ret_text += text_to_add
+        ret_slots += slot_to_add
+    elif intent == 6:
+        if random.randint(0, 1) == 0:
+            ret_text = ['potresti', 'vorresti', 'vorrei', 'voglio'][random.randint(0, 3)] + ' ' + \
+                       ['chiudere', 'chiudere la mail', 'chiudere il messaggio', 'chiuderla', 'uscire',
+                        'uscire dalla mail', 'uscire dal messaggio'][random.randint(0, 6)]
+        else:
+            ret_text = ['chiudi', 'chiudila', 'chiudi la mail', 'chiudi il messaggio', 'esci dalla mail',
+                        'esci dal messaggio'][random.randint(0, 5)]
+
+        ret_slots = ['O'] * len(ret_text.split(' '))
+
+    if ret_text.count('con') > 1:
+        tokens = ret_text.split(' ')
+        found_first = False
+        for i in range(len(tokens) - 1):
+            if tokens[i] == 'con' and not found_first:
+                found_first = True
+            elif tokens[i] == 'con' and tokens[i + 1] == 'oggetto':
+                tokens[i] = 'ed'
+            elif tokens[i] == 'con':
+                tokens[i] = 'e'
+        ret_text = ' '.join(tokens)
+
+    return ret_text, ret_slots
+
 
 # %%
 
-n_intent = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0}
+examples_for_intent = 50
+text_array = []
+slot_array = []
+intent_array = []
 
-for intent in intent_array:
-    n_intent[intent] += 1
+for intent in range(7):
+    for _ in range(examples_for_intent):
+        text, slots = compose_sentence(intent)
+        text_array.append(text)
+        slot_array.append(slots)
+        intent_array.append(intent)
+
+res = pd.DataFrame.from_dict({'text': text_array, 'slots': slot_array, 'intent': intent_array})
+res.to_csv('data/dataset_ner.csv')
