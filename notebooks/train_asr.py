@@ -4,7 +4,7 @@ import numpy as np
 from datasets import load_metric
 from transformers import Wav2Vec2ForCTC, Wav2Vec2FeatureExtractor, Wav2Vec2CTCTokenizer
 from transformers import Wav2Vec2Processor, TrainingArguments, IntervalStrategy, Trainer
-from lib.utils import *
+from utils.lib import *
 
 
 # %% INITIALIZE PROCESSOR

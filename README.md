@@ -20,9 +20,12 @@ if you want to generate the LM by yourself
 200 mb of data from paisa italian corpus in data/lm/corpus.txt
 2) cd into lib/lm and run get_kenlm.sh to get kenlm executables
 3) run build_lm.sh this will generate a lm model in models/lm/lm.arpa
-4) run prepare_lm notebook to generate a lm processor for wav2vec2
+4) run build_asr_with_lm notebook to generate a model in models/wav2vec2LM
+5) if you run infer_asr you get the result of asr with lm. you can safely delete models/lm 
+and models/wav2vec2
 
 #### NER and Intent Classification
 
 1) generate tje dataset using the script lib/generate_dataset.py this will get you a data/ner_dataset.csv file
-2) 
+it must use a file in data/names.txt with some rows in format name,surname with random names and surnames
+2) coming soon...
