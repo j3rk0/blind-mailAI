@@ -1,10 +1,4 @@
 from rdflib import Graph, Namespace, URIRef, RDF, Literal
-from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
-import graphviz
-import io
-import pydotplus
-from IPython.display import display, Image
-from rdflib.tools.rdf2dot import rdf2dot
 
 
 G = Graph()
@@ -29,5 +23,21 @@ G.add((new_node,n.has_text,Literal("voglio creare una nuova mail")))
 G.add((new_node,n.express_intent,Literal("send_mail")))
 G.add((start_node,n.followed_by,new_node))
 
+#%%
+
+from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
+import networkx as nx
+import matplotlib.pyplot as plt
+
+url = 'https://www.w3.org/TeamSubmission/turtle/tests/test-30.ttl'
 
 
+g = rdflib_to_networkx_multidigraph(G)
+
+# Plot Networkx instance of RDF Graph
+pos = nx.spring_layout(g, scale=2)
+edge_labels = nx.get_edge_attributes(g, 'r')
+nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+nx.draw(g, with_labels=True)
+
+plt.show()
