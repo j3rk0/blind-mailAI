@@ -1,3 +1,4 @@
+# %%
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = ""
 import numpy as np
