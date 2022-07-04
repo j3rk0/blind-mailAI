@@ -7,3 +7,5 @@ torch~=1.12.0
 numpy==1.21.6
 sounddevice~=0.4.4
 pyctcdecode~=0.3.0
+kenlm~=0.0.0
+setuptools~=62.6.0

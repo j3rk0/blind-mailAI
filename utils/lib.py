@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List, Union
 import sounddevice as sd
 import librosa
@@ -5,6 +6,7 @@ import pandas as pd
 import torch
 from datasets import load_from_disk, Dataset
 import os
+import numpy as np
 
 
 class DataCollatorCTCWithPadding:
@@ -54,38 +56,61 @@ class DataCollatorCTCWithPadding:
         return batch
 
 
-def load_dataset(source_path, processor, refresh=False):
+def _train_validate_test_split(df, train_percent=.6, validate_percent=.2, seed=None):
+    np.random.seed(seed)
+    perm = np.random.permutation(df.index)
+    m = len(df.index)
+    train_end = int(train_percent * m)
+    validate_end = int(validate_percent * m) + train_end
+    train = df.iloc[perm[:train_end]]
+    validate = df.iloc[perm[train_end:validate_end]]
+    test = df.iloc[perm[validate_end:]]
+    return train, validate, test
+
+
+def load_dataset(processor, refresh=False):
     # check if processed data already exists
-    if os.path.isdir('data/hfdata/train.hf') and os.path.isdir('data/hfdata/eval.hf') and not refresh:
-        return load_from_disk('data/hfdata/train.hf'), load_from_disk('data/hfdata/eval.hf')
+    if os.path.isdir('data/hfdata/train.hf') and os.path.isdir('data/hfdata/eval.hf') and \
+            os.path.isdir('data/hfdata/test.hf') and not refresh:
+        return load_from_disk('data/hfdata/train.hf'), load_from_disk('data/hfdata/eval.hf'), \
+               load_from_disk('data/hfdata/test.hf')
     else:
-        ds = pd.read_csv(f"{source_path}/dataset_nlp.csv")
+        ds = pd.read_csv(f"data/dataset.csv", index_col=0)
+
+        folds = ['train'] * int(.6 * ds.shape[0]) + ['test'] * int(.2 * ds.shape[0]) + \
+                ['valid'] * int(.2 * ds.shape[0])
+
+        random.shuffle(folds)
 
         train_data = {'input_values': [], 'labels': [], 'input_length': []}
         eval_data = {'input_values': [], 'labels': [], 'input_length': []}
+        test_data = {'input_values': [], 'labels': [], 'input_length': []}
+
         for i in range(ds.shape[0]):
 
-            fname, ftext = ds.iloc[i, 0:2]
+            ftext = ds.iloc[i, 0]
 
-            for j in range(1, 8):
-                to_expand = eval_data
-                if j <= 5:  # to Train 1-5
-                    to_expand = train_data
+            waveform, sr = librosa.load(f'data/audio/{i}.mp3', sr=16000)
+            waveform = processor(waveform, sampling_rate=16000).input_values[0]
 
-                waveform, sr = librosa.load(f'{source_path}/mp3/{fname}/{fname}_{j}.mp3', sr=16000)
-                waveform = processor(waveform, sampling_rate=16000).input_values[0]
+            to_expand = eval_data
+            if folds[i] == 'train':
+                to_expand = train_data
+            elif folds[i] == 'test':
+                to_expand = test_data
 
-                with processor.as_target_processor():
-                    to_expand['labels'].append(processor(ftext.lower()).input_ids)
-
-                to_expand['input_values'].append(waveform)
-                to_expand['input_length'].append(len(waveform))
+            to_expand['input_values'].append(waveform)
+            to_expand['input_length'].append(len(waveform))
+            with processor.as_target_processor():
+                to_expand['labels'].append(processor(ftext.lower()).input_ids)
 
         train = Dataset.from_dict(train_data)
         valid = Dataset.from_dict(eval_data)
+        test = Dataset.from_dict(test_data)
         train.save_to_disk('data/hfdata/train.hf')
         valid.save_to_disk('data/hfdata/eval.hf')
-        return train, valid
+        test.save_to_disk('data/hfdata/test.hf')
+        return train, valid, test
 
 
 def record_audio(time=5, sr=16000):

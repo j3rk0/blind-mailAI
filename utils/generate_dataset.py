@@ -23,8 +23,48 @@ i-date: interno slot data
 """
 
 import random
-
 import pandas as pd
+
+import os
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{os.getcwd()}/data/tts_auth_key.json"
+from google.cloud import texttospeech
+
+client = texttospeech.TextToSpeechClient()
+
+
+def generate_audio(text, index):
+    voice_name = ['it-IT-standard-A', 'it-IT-standard-B', 'IT-standard-C',
+                  'IT-standard-D', 'it-IT-Wavenet-A', 'it-IT-Wavenet-B',
+                  'it-IT-Wavenet-C', 'it-IT-Wavenet-D'][random.randint(0, 7)]
+
+    # Set the text input to be synthesized
+    synthesis_input = texttospeech.SynthesisInput(text=text)
+
+    # Build the voice request, select the language code ("en-US") and the ssml
+    # voice gender ("neutral")
+    voice = texttospeech.VoiceSelectionParams(
+        language_code="it", name=voice_name
+    )
+
+    # Select the type of audio file you want returned
+    audio_config = texttospeech.AudioConfig(
+        audio_encoding=texttospeech.AudioEncoding.MP3
+    )
+
+    # Perform the text-to-speech request on the text input with the selected
+    # voice parameters and audio file type
+    response = client.synthesize_speech(
+        input=synthesis_input, voice=voice, audio_config=audio_config
+    )
+
+    if not os.path.isdir('data/audio'):
+        os.mkdir('data/audio')
+    # The response's audio_content is binary.
+    with open(f"data/audio/{index}.mp3", "wb") as out:
+        # Write the response to the output file.
+        out.write(response.audio_content)
+        print('Audio content written to file')
 
 
 def get_random_object():
@@ -35,14 +75,16 @@ def get_random_object():
                 'Problema accesso sito universitario', 'Promemoria', 'info su prescrizione medica',
                 'Assistenza tecnica', 'Reclamo e richiesta di assistenza', 'Candidatura spontanea',
                 'comunicazione importante', 'ordine del giorno', 'richiesta modulo', 'consegna progetto',
-                'conferma invito', 'attivazione profilo'][random.randint(0, 15)].lower()
+                'conferma invito', 'attivazione profilo', 'convalida esame', 'abbonamento napoli calcio',
+                'sottoscrizione abbonamento', 'scadenza consegna', 'rinnovo abbonamento netflix'][
+        random.randint(0, 20)].lower()
 
     ret_slot = ['O', 'O', 'B-OBJ'] + ['I-OBJ'] * (len(ret_text.split(' ')) - 1)
 
     return f"{conj} {ret_text}", ret_slot
 
 
-with open('data/italian_names.csv') as f:
+with open('data/names.txt') as f:
     names = [name.replace('\n', '').replace(',', ' ') for name in f.readlines()]
 
 
@@ -236,7 +278,7 @@ def compose_sentence(intent):
     return ret_text, ret_slots
 
 
-# %%
+# %% GENERATE TEXTUAL DATA AND LABELS
 
 examples_for_intent = 50
 text_array = []
@@ -251,4 +293,10 @@ for intent in range(7):
         intent_array.append(intent)
 
 res = pd.DataFrame.from_dict({'text': text_array, 'slots': slot_array, 'intent': intent_array})
-res.to_csv('data/dataset_ner.csv')
+res.to_csv('data/dataset.csv')
+
+# %% GENERATE AUDIO
+
+for i in range(len(text_array)):
+    print(f'syntetization : {(i/len(text_array) * 100):2f}%')
+    generate_audio(text_array[i], i)
