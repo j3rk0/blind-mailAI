@@ -9,3 +9,5 @@ sounddevice~=0.4.4
 pyctcdecode~=0.3.0
 kenlm~=0.0.0
 setuptools~=62.6.0
+google-cloud-texttospeech
+rdflib
