@@ -1,3 +1,4 @@
+# %%
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = ""
 import numpy as np
@@ -22,8 +23,7 @@ data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
 
 # %% PROCESS DATASET
 # se hai già il file:
-train_data, eval_data, test_data = load_dataset(processor)
-
+train_data, eval_data = load_dataset('data/DATASET_NLP',processor)
 
 
 # %% DEFINE METRICS
