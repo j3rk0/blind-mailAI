@@ -23,7 +23,7 @@ data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
 
 # %% PROCESS DATASET
 # se hai già il file:
-train_data, eval_data = load_dataset('data/DATASET_NLP',processor)
+train_data, eval_data = load_dataset(processor)
 
 
 # %% DEFINE METRICS
@@ -71,7 +71,7 @@ training_args = TrainingArguments(
     per_device_train_batch_size=4,
     gradient_accumulation_steps=3,
     evaluation_strategy=IntervalStrategy.EPOCH,
-    num_train_epochs=5,
+    num_train_epochs=4,
     gradient_checkpointing=True,
     fp16=False,
     save_steps=400,
