@@ -36,3 +36,6 @@ else:
     pred = processor.decode(torch.argmax(logits, dim=-1)[0])
 
 print(f'la tua frase è: {pred}')
+
+
+#%%

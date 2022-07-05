@@ -3,8 +3,11 @@ from datasets import Dataset
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizerFast, BertForTokenClassification, AutoTokenizer
 from transformers import DataCollatorForTokenClassification, IntervalStrategy
-
+from datasets import load_metric
 from transformers import AutoModelForTokenClassification, TrainingArguments, Trainer
+import numpy as np
+from datasets import load_metric
+
 
 
 # %%
@@ -34,7 +37,7 @@ eval = {'id': [i for i in range(eval_df.shape[0])],
                          ",")] for i in range(eval_df.shape[0]) ],
         'tokens': [eval_df.iloc[i, 0].split(' ') for i in range(eval_df.shape[0])]}
 
-label_list = ner_ids.values()
+label_list = list(ner_ids.values())
 
 train = Dataset.from_dict(train)
 eval = Dataset.from_dict(eval)
@@ -83,7 +86,7 @@ training_args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=5,
+    num_train_epochs=8,
     weight_decay=0.01,
 )
 
@@ -93,9 +96,28 @@ trainer = Trainer(
     train_dataset=tokenized_train,
     eval_dataset=tokenized_eval,
     tokenizer=tokenizer,
-    data_collator=data_collator,
+    data_collator=data_collator
 )
 
 trainer.train()
 
+#%%
 
+model.save_pretrained('models/bert4token')
+tokenizer.save_pretrained('models/berttokenizer')
+
+#%%
+
+
+tokenizer = AutoTokenizer.from_pretrained("models/berttokenizer")
+model = AutoModelForTokenClassification.from_pretrained("models/bert4token",num_labels=7)
+
+#%%
+from transformers import pipeline
+token_classifier = pipeline(
+    "token-classification", model=model,tokenizer=tokenizer, aggregation_strategy="simple"
+)
+
+ret = token_classifier('inoltra la mail a franco cutugno con oggetto sei risultato positivo in data diciannove ottobre')
+print(ret)
+#%%
