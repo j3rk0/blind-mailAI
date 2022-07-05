@@ -1,13 +1,12 @@
+import numpy as np
 import pandas as pd
 import torch
-import numpy as np
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizerFast, BertForTokenClassification, AutoTokenizer
-from transformers import DataCollatorForTokenClassification, IntervalStrategy
-from transformers import DataCollatorWithPadding
-
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import AutoTokenizer
+from transformers import DataCollatorWithPadding
+from transformers import IntervalStrategy
 
 # %%
 
@@ -76,6 +75,12 @@ trainer = Trainer(
 
 trainer.train()
 
-#%%
+# %%
+from transformers import pipeline
 
+pipe = pipeline('text-classification', model=model, tokenizer=tokenizer)
+pred = pipe('rispondi a fulvio camera')
+print(pred)
+
+# %%
 model.save_pretrained('models/bert4sequence')

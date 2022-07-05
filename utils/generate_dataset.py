@@ -280,7 +280,7 @@ def compose_sentence(intent):
 
 # %% GENERATE TEXTUAL DATA AND LABELS
 
-examples_for_intent = 50
+examples_for_intent = 100
 text_array = []
 slot_array = []
 intent_array = []

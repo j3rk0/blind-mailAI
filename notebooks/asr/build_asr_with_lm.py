@@ -1,9 +1,7 @@
-import os, sys
-import torch
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, Wav2Vec2ProcessorWithLM
-from utils.lib import record_audio
 import librosa
+import torch
 from pyctcdecode import build_ctcdecoder
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor, Wav2Vec2ProcessorWithLM
 
 # %% INITIALIZE MODEL
 
@@ -28,11 +26,13 @@ processor_with_lm = Wav2Vec2ProcessorWithLM(feature_extractor=processor.feature_
 
 # %% MODEL TESTING
 
-waveform, sr = librosa.load(f'data/DATASET_NLP/mp3/B_3_1/B_3_1_2.mp3', sr=16000) # load from file
+waveform, sr = librosa.load(f'data/audio/2.mp3', sr=16000) # load from file
 
 inputs = processor_with_lm(waveform, sampling_rate=16000, return_tensor='pt', padding=True)
 input_values = torch.FloatTensor(inputs.input_values)
 attention_mask = torch.LongTensor(inputs.attention_mask)
+
+pred = model(input_values,attention_mask)
 
 with torch.no_grad():
     logits = model(input_values, attention_mask).logits

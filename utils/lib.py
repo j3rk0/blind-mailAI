@@ -68,13 +68,13 @@ def _train_validate_test_split(df, train_percent=.6, validate_percent=.2, seed=N
     return train, validate, test
 
 
-def load_dataset(processor, refresh=False):
+def load_dataset(processor=None, refresh=False):
     # check if processed data already exists
     if os.path.isdir('data/hfdata/train.hf') and os.path.isdir('data/hfdata/eval.hf') and \
             os.path.isdir('data/hfdata/test.hf') and not refresh:
         return load_from_disk('data/hfdata/train.hf'), load_from_disk('data/hfdata/eval.hf'), \
                load_from_disk('data/hfdata/test.hf')
-    else:
+    elif processor is not None:
         ds = pd.read_csv(f"data/dataset.csv", index_col=0)
 
         folds = ['train'] * int(.6 * ds.shape[0]) + ['test'] * int(.2 * ds.shape[0]) + \

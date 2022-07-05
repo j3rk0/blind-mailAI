@@ -1,19 +1,14 @@
 import pandas as pd
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizerFast, BertForTokenClassification, AutoTokenizer
-from transformers import DataCollatorForTokenClassification, IntervalStrategy
-from datasets import load_metric
 from transformers import AutoModelForTokenClassification, TrainingArguments, Trainer
-import numpy as np
-from datasets import load_metric
-
-
+from transformers import AutoTokenizer
+from transformers import DataCollatorForTokenClassification, IntervalStrategy
 
 # %%
 
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-model = AutoModelForTokenClassification.from_pretrained("distilbert-base-uncased",num_labels=7)
+model = AutoModelForTokenClassification.from_pretrained("distilbert-base-uncased", num_labels=7)
 # %%
 
 
@@ -25,16 +20,16 @@ train_df, eval_df = train_test_split(df, train_size=.8)
 # %%
 
 train = {'id': [i for i in range(train_df.shape[0])],
-         'ner_tags': [ [ner_ids[t] for t in
-                      train_df.iloc[i, 1].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(
-                          ",")]
-                      for i in range(train_df.shape[0]) ],
+         'ner_tags': [[ner_ids[t] for t in
+                       train_df.iloc[i, 1].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(
+                           ",")]
+                      for i in range(train_df.shape[0])],
          'tokens': [train_df.iloc[i, 0].split(' ') for i in range(train_df.shape[0])]}
 
 eval = {'id': [i for i in range(eval_df.shape[0])],
-        'ner_tags': [ [ner_ids[t] for t in
-                     eval_df.iloc[i, 1].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(
-                         ",")] for i in range(eval_df.shape[0]) ],
+        'ner_tags': [[ner_ids[t] for t in
+                      eval_df.iloc[i, 1].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(
+                          ",")] for i in range(eval_df.shape[0])],
         'tokens': [eval_df.iloc[i, 0].split(' ') for i in range(eval_df.shape[0])]}
 
 label_list = list(ner_ids.values())
@@ -77,7 +72,7 @@ def tokenize_and_align_labels(examples):
 tokenized_train = train.map(tokenize_and_align_labels, batched=True)
 tokenized_eval = eval.map(tokenize_and_align_labels, batched=True)
 
-#%%
+# %%
 data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
 
 training_args = TrainingArguments(
@@ -101,23 +96,26 @@ trainer = Trainer(
 
 trainer.train()
 
-#%%
+# %%
 
 model.save_pretrained('models/bert4token')
 tokenizer.save_pretrained('models/berttokenizer')
 
-#%%
+# %%
 
 
 tokenizer = AutoTokenizer.from_pretrained("models/berttokenizer")
-model = AutoModelForTokenClassification.from_pretrained("models/bert4token",num_labels=7)
+model = AutoModelForTokenClassification.from_pretrained("models/bert4token", num_labels=7)
 
-#%%
+# %%
 from transformers import pipeline
+
 token_classifier = pipeline(
-    "token-classification", model=model,tokenizer=tokenizer, aggregation_strategy="simple"
+    "token-classification", model=model, tokenizer=tokenizer, aggregation_strategy="simple"
 )
 
 ret = token_classifier('inoltra la mail a franco cutugno con oggetto sei risultato positivo in data diciannove ottobre')
 print(ret)
-#%%
+
+
+# %%
