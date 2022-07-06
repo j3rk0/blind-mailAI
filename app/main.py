@@ -4,6 +4,7 @@ import librosa
 import sounddevice as sd
 from google.cloud import texttospeech
 
+from app.graph import GraphDST
 from app.asr import ASRModule
 from app.email import EmailModule
 from app.understanding import UnderstandingModule
@@ -51,39 +52,50 @@ class App:
         self.asr_module = ASRModule()
         self.opened_mail = []
         self.mail_module = EmailModule()
+        self.graph_module = GraphDST()
         self.speaker.say('caricamento completato')
         # initialize graph
 
     def main_loop(self):
+        self.graph_module.print_graph()
         if len(self.opened_mail) == 0:
             self.speaker.say('cosa vuoi fare?')
+            self.graph_module.exchange('System', 'cosa vuoi fare?')
 
             text = self.asr_module.transcribe_audio(6)
             intent, slots = self.understanding_module.process(text)
+
             # aggiungi successore
 
             if intent == 'send_email' and len(self.opened_mail) == 0:
                 self.speaker.say('invio una mail')
+                self.graph_module.exchange('System', 'invio una mail')
                 mail = {'object': None, 'user': None, 'body': None}
                 for slot in slots:
                     if slot[0] == 'object':
                         mail['object'] = slot[1]
                     elif slot[0] == 'person':
                         mail['user'] = slot[1]
-
+                self.graph_module.exchange('User',text,intent,slots)
                 for field in mail.keys():
                     if mail[field] is None:
                         if field == 'user':
                             self.speaker.say('a chi va inviato?')
+                            self.graph_module.exchange('System', 'a chi va inviato?')
                             mail['user'] = self.asr_module.transcribe_audio()
-                            # aggiorna grafo
+                            self.graph_module.exchange('User', mail['user'], None,[('person',mail['user'])])
+
                         elif field == 'object':
                             self.speaker.say('qual\' è l\' ogetto?')
+                            self.graph_module.exchange('System', 'qual è l oggetto?')
                             mail['object'] = self.asr_module.transcribe_audio()
+                            self.graph_module.exchange('User', mail['object'], None, [('person', mail['object'])])
                             # aggiorna grafo
                         elif field == 'body':
                             self.speaker.say('qual è il corpo della mail?')
+                            self.graph_module.exchange('System', 'qual è il corpo della mail?')
                             mail['body'] = self.asr_module.transcribe_audio(10)
+                            self.graph_module.exchange('User', mail['body'], None, [('person', mail['body'])])
                             # aggiorna grafo
 
                 self.speaker.say('sei sicuro di voler inviare?')
@@ -93,15 +105,6 @@ class App:
                     t = self.asr_module.transcribe_audio(3)
                 if 'si' in t:
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
-
-                # aggiorna grafo
-                res = self.asr_module.transcribe_audio(3)
-                # aggiorna grafo
-                if 'si' in res:
-                    self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
-                else:
-                    self.main_loop()
-                    return
 
             elif intent == 'list_email' or len(self.opened_mail) > 0:
 
@@ -120,10 +123,19 @@ class App:
                                  f'{f"con ogetto {object}" if object is not None else ""} '
                                  f'{f"ricevute in data {time}" if time is not None else ""}')
 
+                self.graph_module.exchange('System', f'cerco le mail {f"da {person}" if person is not None else ""} '
+                                                     f'{f"con ogetto {object}" if object is not None else ""} '
+                                                     f'{f"ricevute in data {time}" if time is not None else ""}')
+
                 # aggiorna grafo
 
                 self.opened_mail = self.mail_module.get_email(object, time, person)
                 self.speaker.say(f"ci sono {len(self.opened_mail)} nuove mail"
+                                 f"{f'da {person}' if person is not None else ''} "
+                                 f"{f'in data {time}' if time is not None else ''} "
+                                 f"{f'con ogetto {object}' if object is not None else ''}")
+
+                self.graph_module.exchange('System', f"ci sono {len(self.opened_mail)} nuove mail"
                                  f"{f'da {person}' if person is not None else ''} "
                                  f"{f'in data {time}' if time is not None else ''} "
                                  f"{f'con ogetto {object}' if object is not None else ''}")
@@ -134,7 +146,7 @@ class App:
                 return
             elif 'aiuto' in text:
                 self.speaker.say('operazioni possibili')
-                # aggiorna grafo
+                self.graph_module.exchange('System', 'operazioni possibili')
                 self.main_loop()
                 return
             else:
@@ -144,16 +156,21 @@ class App:
         else:
             mail = self.opened_mail[0]
             self.speaker.say(f"mail da {mail['person']} con oggetto {mail['object']}, cosa vuoi fare?")
-            # aggiorna grafo
+            self.graph_module.exchange('System',
+                                       f"mail da {mail['person']} con oggetto {mail['object']}, cosa vuoi fare?")
             text = self.asr_module.transcribe_audio()
-            # aggiorna grafo
             intent, slots = self.understanding_module.process(text)
+
             if intent == 'read_email':
+                self.graph_module.exchange('User', text, intent, None)
                 self.speaker.say(f"{mail['body']}")
+                self.graph_module.exchange('System', f"{mail['body']}")
                 self.main_loop()
                 return
             elif intent == 'delete_email':
+                self.graph_module.exchange('User', text, intent, None)
                 self.speaker.say('sei sicuro di voler cancellare la mail?')
+                self.graph_module.exchange('System','sei sicuro di voler cancellare la mail?')
                 t = self.asr_module.transcribe_audio(3)
                 while not 'si' in t or 'no' in t:
                     self.speaker.say('non ho capito, sei sicuro di voler inviare?')
@@ -161,7 +178,6 @@ class App:
                 if 'si' in t:
                     del self.opened_mail[0]
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
-                # aggiorna grafo
                 self.main_loop()
                 return
             elif intent == 'forward_email':
@@ -172,41 +188,49 @@ class App:
                         new_mail['person'] = slot[1]
                 if new_mail['person'] is None:
                     self.speaker.say('a chi va inoltrata la mail?')
-                    # aggiorna grafo
+                    self.graph_module.exchange('System', 'a chi va inoltrata la mail?')
                     new_mail['person'] = self.asr_module.transcribe_audio()
-                    # aggiorna grafo
+                    self.graph_module.exchange('User', new_mail['person'], None, new_mail['person'])
+
+                self.graph_module.exchange('User', text, intent, [('person',new_mail['person'])])
                 self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
                 self.main_loop()
                 return
 
             elif intent == 'reply_email':
                 new_mail = {'body': None, 'object': f're:{mail["object"]}', 'person': mail['person']}
-
+                self.graph_module.exchange('User', text, intent, None)
                 self.speaker.say('qual è il corpo della mail?')
+                self.graph_module.exchange('System', 'qual è il corpo della mail?')
                 new_mail['body'] = self.asr_module.transcribe_audio(10)
 
-                # aggiorna grafo
+                self.graph_module.exchange('User', text, intent,
+                                           [('person', mail['person']), ('object', mail['object'])])
+
 
                 self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
 
             elif intent == 'close_email':
-                # aggiorna grafo
+                self.graph_module.exchange('User', text, intent, None)
+                self.graph_module.exchange('User', intent)
                 if len(self.opened_mail) > 0:
                     del self.opened_mail[0]
                 self.main_loop()
                 return
             elif 'esci' in text:
+                self.graph_module.exchange('User', intent)
                 self.speaker.say('ciao!')
                 return
             else:
+                self.graph_module.exchange('User', intent)
                 self.speaker.say('non ho capito')
                 self.main_loop()
                 return
 
 
 # %%
-
 app = App()
-# %%
 
+# %%
 app.main_loop()
+

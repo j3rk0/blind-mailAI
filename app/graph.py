@@ -26,21 +26,24 @@ class GraphDST:
         self.namespace = n
         self.g = G
 
-    def exchange(self,actor,text,intent=None,slots=None):
+    def exchange(self, actor, text, intent=None, slots=None):
 
         new_node = URIRef(f"http://progettonlp.org/exchange_{self.exchange_count}")
-        self.g.add((new_node,self.namespace.has_text,Literal(text)))
-        self.g.add((self.last_exchange,self.namespace.followed_by,new_node))
+        self.exchange_count += 1
+        self.g.add((new_node, self.namespace.has_text, Literal(text)))
+        self.g.add((self.last_exchange, self.namespace.followed_by, new_node))
 
-        if (actor == "System"):
-            self.g.add((new_node,RDF.type,self.namespace.system_exchange))
+        if actor == "System":
+            self.g.add((new_node, RDF.type, self.namespace.system_exchange))
 
-        elif (actor == "User"):
-            self.g.add((new_node,RDF.type,self.namespace.user_exchange))
-            self.g.add((new_node,self.namespace.express_intent,Literal(intent)))
-            if (slots is not None):
+        elif actor == "User":
+            self.g.add((new_node, RDF.type, self.namespace.user_exchange))
+            if intent is not None:
+                self.g.add((new_node, self.namespace.express_intent, Literal(intent)))
+            if slots is not None:
                 for slot in slots:
-                    self.g.add((new_node,self.namespace.refers_to,Literal(slot[1])))
+                    self.g.add((new_node, self.namespace.refers_to, Literal(slot[1])))
+        self.last_exchange = new_node
 
 
     def print_graph(self):
@@ -54,6 +57,3 @@ class GraphDST:
         nx.draw(g, with_labels=True)
 
         plt.show()
-
-
-
