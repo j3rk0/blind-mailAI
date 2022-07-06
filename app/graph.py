@@ -1,4 +1,4 @@
-from py2neo import Graph
+import rdflib
 
 
 class GraphDST:

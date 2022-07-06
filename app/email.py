@@ -25,4 +25,4 @@ class EmailModule:
         return [mail for mail in self.mail_db if (object is None or object in mail['object']) and \
                 (time is None or any(
                     [i in mail['time']['month'] or i in mail['time']['day'] for i in time.split(' ')])) and \
-                (person is None or person == mail['person'])]
+                (person is None or person in mail['person'])]

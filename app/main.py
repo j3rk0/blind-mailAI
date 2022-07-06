@@ -9,7 +9,10 @@ from app.email import EmailModule
 from app.understanding import UnderstandingModule
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{os.getcwd()}/data/tts_auth_key.json"
-#wewe
+os.environ['TOKENIZERS_PARALLELISM'] = 'true'
+
+
+# wewe
 
 class Speaker:
 
@@ -42,18 +45,20 @@ class Speaker:
 
 class App:
     def __init__(self):
+        self.speaker = Speaker()
+        self.speaker.say('caricamento moduli, attendere')
         self.understanding_module = UnderstandingModule()
         self.asr_module = ASRModule()
         self.opened_mail = []
         self.mail_module = EmailModule()
-        self.speaker = Speaker()
+        self.speaker.say('caricamento completato')
         # initialize graph
 
     def main_loop(self):
         if len(self.opened_mail) == 0:
             self.speaker.say('cosa vuoi fare?')
 
-            text = self.asr_module.transcribe_audio(8)
+            text = self.asr_module.transcribe_audio(6)
             intent, slots = self.understanding_module.process(text)
             # aggiungi successore
 
@@ -86,13 +91,13 @@ class App:
                 while not 'si' in t or 'no' in t:
                     self.speaker.say('non ho capito, sei sicuro di voler inviare?')
                     t = self.asr_module.transcribe_audio(3)
-                if t == 'si':
-                    self.mail_module.dispatch_intent({'intent':intent,'mail':mail})
+                if 'si' in t:
+                    self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
 
                 # aggiorna grafo
                 res = self.asr_module.transcribe_audio(3)
                 # aggiorna grafo
-                if res == 'si':
+                if 'si' in res:
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
                 else:
                     self.main_loop()
@@ -118,15 +123,16 @@ class App:
                 # aggiorna grafo
 
                 self.opened_mail = self.mail_module.get_email(object, time, person)
-                self.speaker.say(f"ci sono {len(self.opened_mail)} "
+                self.speaker.say(f"ci sono {len(self.opened_mail)} nuove mail"
                                  f"{f'da {person}' if person is not None else ''} "
                                  f"{f'in data {time}' if time is not None else ''} "
                                  f"{f'con ogetto {object}' if object is not None else ''}")
                 self.main_loop()
                 return
-            elif text == 'esci':
+            elif 'esci' in text:
+                self.speaker.say('ciao!')
                 return
-            elif text == 'aiuto':
+            elif 'aiuto' in text:
                 self.speaker.say('operazioni possibili')
                 # aggiorna grafo
                 self.main_loop()
@@ -144,14 +150,16 @@ class App:
             intent, slots = self.understanding_module.process(text)
             if intent == 'read_email':
                 self.speaker.say(f"{mail['body']}")
-                self.opened_mail = mail
+                self.main_loop()
+                return
             elif intent == 'delete_email':
                 self.speaker.say('sei sicuro di voler cancellare la mail?')
                 t = self.asr_module.transcribe_audio(3)
                 while not 'si' in t or 'no' in t:
                     self.speaker.say('non ho capito, sei sicuro di voler inviare?')
                     t = self.asr_module.transcribe_audio(3)
-                if t == 'si':
+                if 'si' in t:
+                    del self.opened_mail[0]
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
                 # aggiorna grafo
                 self.main_loop()
@@ -168,13 +176,14 @@ class App:
                     new_mail['person'] = self.asr_module.transcribe_audio()
                     # aggiorna grafo
                 self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
+                self.main_loop()
+                return
 
             elif intent == 'reply_email':
                 new_mail = {'body': None, 'object': f're:{mail["object"]}', 'person': mail['person']}
 
                 self.speaker.say('qual è il corpo della mail?')
                 new_mail['body'] = self.asr_module.transcribe_audio(10)
-
 
                 # aggiorna grafo
 
@@ -186,18 +195,18 @@ class App:
                     del self.opened_mail[0]
                 self.main_loop()
                 return
-            elif 'esci' in  text:
-                self.opened_mail = []
-                self.main_loop()
+            elif 'esci' in text:
+                self.speaker.say('ciao!')
                 return
             else:
                 self.speaker.say('non ho capito')
+                self.main_loop()
+                return
 
 
 # %%
 
 app = App()
+# %%
+
 app.main_loop()
-
-
-
