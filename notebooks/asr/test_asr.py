@@ -46,22 +46,25 @@ print(f"wer with no LM: {avg_wer}, wer with lm: {avg_LM_wer}")
 
 # %%
 from utils.lib import record_audio
+
 waveforms = []
 text = ['leggi una mail', 'rispondi alla mail', 'invia una mail con ogetto vincita lotteria',
-        'elimina la mail','cerca le mail inviate a gennaio', 'inoltra questa mail',
-        'vorrei cercare tutte le mail da fulvio camera ricevute ieri','elimina la mail con oggetto ricevuta',
-        'leggi le mail di oggi','inoltra la mail a vincenzo']
+        'elimina la mail', 'cerca le mail inviate a gennaio', 'inoltra questa mail',
+        'vorrei cercare tutte le mail da fulvio camera ricevute ieri',
+        'elimina la mail con oggetto ricevuta',
+        'leggi le mail di oggi', 'inoltra la mail a vincenzo', 'rispondi a questa mail']
 
 for t in text:
     print(f"{t}")
     waveforms.append(record_audio())
 
-#%%
+# %%
 
 
 test_wer = []
 testLM_wer = []
-
+p = []
+plm = []
 for i in range(len(text)):
     print(f"{(i / len(text) * 100):.2f}% completed")
     ground_truth = text[i]
@@ -76,11 +79,26 @@ for i in range(len(text)):
 
     predLM = processorLM.batch_decode(logits.numpy()).text[0].lower()
     pred = processor.decode(torch.argmax(logits, dim=-1)[0]).lower()
+
+    p.append(pred)
+    plm.append(predLM)
+
     test_wer.append(wer(pred, ground_truth))
     testLM_wer.append(wer(predLM, ground_truth))
 
-#%%
+# %%
 
 avg_wer = sum(test_wer) / len(test_wer)
 avg_LM_wer = sum(testLM_wer) / len(testLM_wer)
 print(f"wer with no LM: {avg_wer}, wer with lm: {avg_LM_wer}")
+
+
+#%%
+import sounddevice as sd
+print('start recording')
+myrecording = sd.rec(int(5 * 16000), samplerate=16000, channels=1)
+sd.wait()
+print('stop recording')
+#sd.play(myrecording,16000)
+
+

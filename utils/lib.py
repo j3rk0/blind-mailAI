@@ -208,8 +208,8 @@ def format_asr_result(res):
 def format_seqclf_result(res):
     return {"LABEL_0": "send_email",
             "LABEL_1": "list_email",
-            "LABEL_3": "read_email",
-            "LABEL_4": "delete_email",
-            "LABEL_5": "reply_email",
-            "LABEL_6": "forward_email",
-            "LABEL_7": "close_email"}[res[0]['label']]
+            "LABEL_2": "read_email",
+            "LABEL_3": "delete_email",
+            "LABEL_4": "reply_email",
+            "LABEL_5": "forward_email",
+            "LABEL_6": "close_email"}[res[0]['label']]
