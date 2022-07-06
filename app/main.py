@@ -9,7 +9,7 @@ from app.email import EmailModule
 from app.understanding import UnderstandingModule
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = f"{os.getcwd()}/data/tts_auth_key.json"
-
+#wewe
 
 class Speaker:
 
