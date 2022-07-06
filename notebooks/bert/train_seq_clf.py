@@ -17,13 +17,15 @@ model = AutoModelForSequenceClassification.from_pretrained("models/bert4token",
 
 # %%
 
-intent_ids = {"send_email": 0,
-              "list_email": 1,
-              "read_email": 2,
-              "delete_email": 3,
-              "reply_email": 4,
-              "forward_email": 5,
-              "close_email": 6}
+intent_labels = {"LABEL_0": "send_email",
+                 "LABEL_1": "list_email",
+                 "LABEL_3": "read_email",
+                 "LABEL_4": "delete_email",
+                 "LABEL_5": "reply_email",
+                 "LABEL_6": "forward_email",
+                 "LABEL_7": "close_email"}
+
+#%%
 
 inputs = tokenizer('ciao pasquale come va', return_tensors="pt")
 with torch.no_grad():
@@ -52,6 +54,20 @@ train = Dataset.from_dict(train)
 eval = Dataset.from_dict(eval)
 
 # %%
+from datasets import load_metric
+
+metric = load_metric("accuracy")
+
+test = None
+
+
+def compute_metrics(p):
+    preds = np.argmax(p.predictions, axis=1)
+    truth = np.argmax(p.label_ids, axis=1)
+    return {"accuracy": (preds == truth).mean()}
+
+
+# %%
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 training_args = TrainingArguments(
@@ -60,7 +76,7 @@ training_args = TrainingArguments(
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=8,
+    num_train_epochs=3,
     weight_decay=0.01,
 )
 
@@ -71,6 +87,7 @@ trainer = Trainer(
     eval_dataset=eval,
     tokenizer=tokenizer,
     data_collator=data_collator,
+    compute_metrics=compute_metrics
 )
 
 trainer.train()
@@ -79,8 +96,9 @@ trainer.train()
 from transformers import pipeline
 
 pipe = pipeline('text-classification', model=model, tokenizer=tokenizer)
-pred = pipe('rispondi a fulvio camera')
-print(pred)
+pred = pipe('rispondi a fulvio camera')[0]
+
+print(intent_labels[pred['label']])
 
 # %%
 model.save_pretrained('models/bert4sequence')

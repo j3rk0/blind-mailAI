@@ -119,3 +119,97 @@ def record_audio(time=5, sr=16000):
     sd.wait()
     print('stop recording')
     return myrecording.T[0]
+
+
+def merge_tokens(accumuled_tokens):
+    n_elem = len(accumuled_tokens)
+    if n_elem == 1:
+        return accumuled_tokens[0]
+    t_len = np.zeros(n_elem)
+    t_lab = []
+    t_sco = np.zeros(n_elem)
+    t_text = []
+    for i in range(n_elem):
+        t_text.append(accumuled_tokens[i]['text'].replace('##', ''))
+        t_len[i] = len(accumuled_tokens[i]['text'].replace('##', ''))
+        t_sco[i] = accumuled_tokens[i]['score']
+        t_lab.append(accumuled_tokens[i]['label'])
+
+    ret_score = t_sco.max()
+    weights = (t_len * t_sco) / (t_len.sum() * t_sco.sum())
+    scores = {}
+    max_score = 0
+    best_label = None
+    for i in range(n_elem):
+
+        if t_lab[i] not in scores.keys():
+            scores[t_lab[i]] = weights[i]
+        else:
+            scores[t_lab[i]] += weights[i]
+
+        if scores[t_lab[i]] >= max_score:
+            max_score = scores[t_lab[i]]
+            best_label = t_lab[i]
+    return {'text': ''.join(t_text), 'score': ret_score, 'label': best_label}
+
+
+# %%
+def format_tokenclf_result(res):
+    token_labels = {'LABEL_0': 'O',
+                    'LABEL_1': 'B-PER',
+                    'LABEL_2': 'I-PER',
+                    'LABEL_3': 'B-OBJ',
+                    'LABEL_4': 'I-OBJ',
+                    'LABEL_5': 'B-DATE',
+                    'LABEL_6': 'I-DATE'}
+    # unpack tokens
+    temp = []
+    for r in res:
+        tokens = r['word'].split(' ')
+        for token in tokens:
+            temp.append({'text': token,
+                         'label': token_labels[r['entity_group']],
+                         'score': r['score']})
+
+    # merge tokens
+    ret = []
+    accumuled_tokens = []
+    for r in temp:
+        if r['text'][0:2] == "##" or len(accumuled_tokens) == 0:
+            accumuled_tokens.append(r)
+        elif len(accumuled_tokens) > 0:
+            ret.append(merge_tokens(accumuled_tokens))
+            accumuled_tokens = [r]
+    ret.append(merge_tokens(accumuled_tokens))
+    ret.reverse()
+    curr = None
+    res = []
+    to_append = None
+    # merge slots
+    while len(ret) > 0:
+        curr = ret.pop()
+        if to_append is None:
+            to_append = curr
+        elif to_append['label'] == curr['label'] or \
+            to_append['label'][-3:] == curr['label'][-3:]:
+            to_append['text'] = f"{to_append['text']} {curr['text']}"
+        elif to_append is not None:
+            res.append(to_append)
+            to_append = curr
+
+    res.append(to_append)
+    return res
+
+
+def format_asr_result(res):
+    return res['text'].lower()
+
+
+def format_seqclf_result(res):
+    return {"LABEL_0": "send_email",
+            "LABEL_1": "list_email",
+            "LABEL_3": "read_email",
+            "LABEL_4": "delete_email",
+            "LABEL_5": "reply_email",
+            "LABEL_6": "forward_email",
+            "LABEL_7": "close_email"}[res[0]['label']]

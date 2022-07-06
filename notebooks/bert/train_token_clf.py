@@ -7,8 +7,8 @@ from transformers import DataCollatorForTokenClassification, IntervalStrategy
 
 # %%
 
-tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-model = AutoModelForTokenClassification.from_pretrained("distilbert-base-uncased", num_labels=7)
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+model = AutoModelForTokenClassification.from_pretrained("bert-base-uncased", num_labels=7)
 # %%
 
 
@@ -73,15 +73,44 @@ tokenized_train = train.map(tokenize_and_align_labels, batched=True)
 tokenized_eval = eval.map(tokenize_and_align_labels, batched=True)
 
 # %%
+
+
+from datasets import load_metric
+import numpy as np
+
+metric = load_metric('seqeval')
+
+
+def compute_metrics(p):
+    predictions, labels = p
+    predictions = np.argmax(predictions, axis=2)
+
+    # Remove ignored index (special tokens)
+    true_predictions = [
+        [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+    true_labels = [
+        [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+        for prediction, label in zip(predictions, labels)
+    ]
+
+    results = metric.compute(predictions=true_predictions, references=true_labels)
+    return {"accuracy": results["overall_accuracy"],
+    }
+
+
+# %%
 data_collator = DataCollatorForTokenClassification(tokenizer=tokenizer)
 
 training_args = TrainingArguments(
-    output_dir="models/bert4tokens",
+    output_dir="models/bert4token",
+
     evaluation_strategy=IntervalStrategy.EPOCH,
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=8,
+    num_train_epochs=4,
     weight_decay=0.01,
 )
 
@@ -91,7 +120,8 @@ trainer = Trainer(
     train_dataset=tokenized_train,
     eval_dataset=tokenized_eval,
     tokenizer=tokenizer,
-    data_collator=data_collator
+    data_collator=data_collator,
+    compute_metrics=compute_metrics
 )
 
 trainer.train()
@@ -109,13 +139,15 @@ model = AutoModelForTokenClassification.from_pretrained("models/bert4token", num
 
 # %%
 from transformers import pipeline
-
+from utils.lib import format_tokenclf_result
 token_classifier = pipeline(
     "token-classification", model=model, tokenizer=tokenizer, aggregation_strategy="simple"
 )
 
-ret = token_classifier('inoltra la mail a franco cutugno con oggetto sei risultato positivo in data diciannove ottobre')
-print(ret)
+ret = token_classifier('cerca le mail da franco cutugno con oggetto risultato tampone in data diciannove ottobre')
+
+
+print(format_tokenclf_result(ret))
 
 
 # %%

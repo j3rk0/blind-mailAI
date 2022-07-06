@@ -280,7 +280,7 @@ def compose_sentence(intent):
 
 # %% GENERATE TEXTUAL DATA AND LABELS
 
-examples_for_intent = 100
+examples_for_intent = 150
 text_array = []
 slot_array = []
 intent_array = []
@@ -296,7 +296,8 @@ res = pd.DataFrame.from_dict({'text': text_array, 'slots': slot_array, 'intent':
 res.to_csv('data/dataset.csv')
 
 # %% GENERATE AUDIO
+import time
 
 for i in range(len(text_array)):
-    print(f'syntetization : {(i/len(text_array) * 100):2f}%')
+    print(f'syntetization : {(i / len(text_array) * 100):.2f}%')
     generate_audio(text_array[i], i)

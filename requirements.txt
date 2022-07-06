@@ -12,4 +12,5 @@ setuptools~=62.6.0
 google-cloud-texttospeech
 rdflib
 networkx
+seqeval
 easyimap

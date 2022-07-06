@@ -1,7 +1,7 @@
 # %%
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = ""
-import numpy as np
+import sys
 from datasets import load_metric
 from transformers import Wav2Vec2ForCTC, Wav2Vec2FeatureExtractor, Wav2Vec2CTCTokenizer
 from transformers import Wav2Vec2Processor, TrainingArguments, IntervalStrategy, Trainer
@@ -23,8 +23,7 @@ data_collator = DataCollatorCTCWithPadding(processor=processor, padding=True)
 
 # %% PROCESS DATASET
 # se hai già il file:
-train_data, eval_data = load_dataset(processor)
-
+train_data, eval_data, test_data = load_dataset(processor)
 
 # %% DEFINE METRICS
 
@@ -69,9 +68,9 @@ training_args = TrainingArguments(
     output_dir='models/wav2vec2',
     group_by_length=True,
     per_device_train_batch_size=4,
-    gradient_accumulation_steps=3,
+    gradient_accumulation_steps=1,
     evaluation_strategy=IntervalStrategy.EPOCH,
-    num_train_epochs=4,
+    num_train_epochs=5,
     gradient_checkpointing=True,
     fp16=False,
     save_steps=400,
