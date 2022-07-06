@@ -2,7 +2,7 @@ pandas~=1.4.3
 transformers~=4.20.1
 librosa~=0.9.2
 datasets~=2.3.2
-jiwer
+jiwer~=2.3.0
 torch~=1.12.0
 numpy==1.21.6
 sounddevice~=0.4.4
@@ -10,7 +10,10 @@ pyctcdecode~=0.3.0
 kenlm~=0.0.0
 setuptools~=62.6.0
 google-cloud-texttospeech
-rdflib
-networkx
+rdflib~=6.1.1
+networkx~=2.8.4
 seqeval
 easyimap
+SoundFile~=0.10.3.post1
+scikit-learn~=1.1.1
+matplotlib~=3.5.2
