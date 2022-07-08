@@ -8,18 +8,18 @@ class GraphDST:
     def __init__(self):
         G = Graph()
 
-        n = Namespace("http://progettonlp.org/")
-        n.user_exchange = URIRef("http://progettonlp.org/types/user_exchange")
-        n.system_exchange = URIRef("http://progettonlp.org/types/system_exchange")
-        n.intent = URIRef("http://progettonlp.org/types/intent")
-        n.object = URIRef("http://progettonlp.org/types/object")
-        n.person = URIRef("http://progettonlp.org/types/person")
-        n.mail = URIRef("http://progettonlp.org/types/mail")
-        n.followed_by = URIRef("http://progettonlp.org/types/followed_by")
-        n.express_intent = URIRef("http://progettonlp.org/types/express_intent")
-        n.refers_to = URIRef("http://progettonlp.org/types/refers_to")
-        n.has_text = URIRef("http://progettonlp.org/types/has_text")
-        start_node = URIRef("http://progettonlp.org/start")
+        n = Namespace("blind_mail/")
+        n.user_exchange = URIRef("blind_mail/types/user_exchange")
+        n.system_exchange = URIRef("blind_mail/types/system_exchange")
+        n.intent = URIRef("blind_mail/types/intent")
+        n.object = URIRef("blind_mail/types/object")
+        n.person = URIRef("blind_mail/types/person")
+        n.mail = URIRef("blind_mail/types/mail")
+        n.followed_by = URIRef("blind_mail/rel/followed_by")
+        n.express_intent = URIRef("blind_mail/rel/express_intent")
+        n.refers_to = URIRef("blind_mail/rel/refers_to")
+        n.has_text = URIRef("blind_mail/rel/has_text")
+        start_node = URIRef("blind_mail/start")
 
         self.exchange_count = 1
         self.last_exchange = start_node
@@ -28,7 +28,7 @@ class GraphDST:
 
     def exchange(self, actor, text, intent=None, slots=None):
 
-        new_node = URIRef(f"http://progettonlp.org/exchange_{self.exchange_count}")
+        new_node = URIRef(f"blind_mail/exchange_{self.exchange_count}")
         self.exchange_count += 1
         self.g.add((new_node, self.namespace.has_text, Literal(text)))
         self.g.add((self.last_exchange, self.namespace.followed_by, new_node))

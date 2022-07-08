@@ -76,14 +76,14 @@ class App:
                         mail['object'] = slot[1]
                     elif slot[0] == 'person':
                         mail['user'] = slot[1]
-                self.graph_module.exchange('User',text,intent,slots)
+                self.graph_module.exchange('User', text, intent, slots)
                 for field in mail.keys():
                     if mail[field] is None:
                         if field == 'user':
                             self.speaker.say('a chi va inviato?')
                             self.graph_module.exchange('System', 'a chi va inviato?')
                             mail['user'] = self.asr_module.transcribe_audio()
-                            self.graph_module.exchange('User', mail['user'], None,[('person',mail['user'])])
+                            self.graph_module.exchange('User', mail['user'], None, [('person', mail['user'])])
 
                         elif field == 'object':
                             self.speaker.say('qual\' è l\' ogetto?')
@@ -98,13 +98,11 @@ class App:
                             self.graph_module.exchange('User', mail['body'], None, [('person', mail['body'])])
                             # aggiorna grafo
 
-                self.speaker.say('sei sicuro di voler inviare?')
-                t = self.asr_module.transcribe_audio(3)
-                while not 'si' in t or 'no' in t:
-                    self.speaker.say('non ho capito, sei sicuro di voler inviare?')
-                    t = self.asr_module.transcribe_audio(3)
-                if 'si' in t:
+                if self.ask_confirm('inviare'):
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
+                    self.speaker.say(f'mail per {mail["person"]} inviata')
+                self.main_loop()
+                return
 
             elif intent == 'list_email' or len(self.opened_mail) > 0:
 
@@ -136,9 +134,9 @@ class App:
                                  f"{f'con ogetto {object}' if object is not None else ''}")
 
                 self.graph_module.exchange('System', f"ci sono {len(self.opened_mail)} nuove mail"
-                                 f"{f'da {person}' if person is not None else ''} "
-                                 f"{f'in data {time}' if time is not None else ''} "
-                                 f"{f'con ogetto {object}' if object is not None else ''}")
+                                                     f"{f'da {person}' if person is not None else ''} "
+                                                     f"{f'in data {time}' if time is not None else ''} "
+                                                     f"{f'con ogetto {object}' if object is not None else ''}")
                 self.main_loop()
                 return
             elif 'esci' in text:
@@ -167,19 +165,17 @@ class App:
                 self.graph_module.exchange('System', f"{mail['body']}")
                 self.main_loop()
                 return
+
             elif intent == 'delete_email':
                 self.graph_module.exchange('User', text, intent, None)
-                self.speaker.say('sei sicuro di voler cancellare la mail?')
-                self.graph_module.exchange('System','sei sicuro di voler cancellare la mail?')
-                t = self.asr_module.transcribe_audio(3)
-                while not 'si' in t or 'no' in t:
-                    self.speaker.say('non ho capito, sei sicuro di voler inviare?')
-                    t = self.asr_module.transcribe_audio(3)
-                if 'si' in t:
+
+                if self.ask_confirm('cancellare la mail'):
                     del self.opened_mail[0]
                     self.mail_module.dispatch_intent({'intent': intent, 'mail': mail})
+                    self.speaker.say('mail eliminata')
                 self.main_loop()
                 return
+
             elif intent == 'forward_email':
                 new_mail = {'body': mail['body'], 'object': f"fwd:{mail['object']}", 'person': None,
                             'time': {'day': 'oggi', 'month': 'oggi'}}
@@ -192,8 +188,11 @@ class App:
                     new_mail['person'] = self.asr_module.transcribe_audio()
                     self.graph_module.exchange('User', new_mail['person'], None, new_mail['person'])
 
-                self.graph_module.exchange('User', text, intent, [('person',new_mail['person'])])
-                self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
+                self.graph_module.exchange('User', text, intent, [('person', new_mail['person'])])
+
+                if self.ask_confirm('inoltrare la mail'):
+                    self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
+                    self.speaker.say(f'mail inoltrata a {mail["person"]}')
                 self.main_loop()
                 return
 
@@ -207,9 +206,11 @@ class App:
                 self.graph_module.exchange('User', text, intent,
                                            [('person', mail['person']), ('object', mail['object'])])
 
-
-                self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
-
+                if self.ask_confirm('rispondere alla mail'):
+                    self.mail_module.dispatch_intent({'intent': intent, 'mail': new_mail})
+                    self.speaker.say(f"mail inviata a {new_mail['person']}")
+                self.main_loop()
+                return
             elif intent == 'close_email':
                 self.graph_module.exchange('User', text, intent, None)
                 self.graph_module.exchange('User', intent)
@@ -227,10 +228,19 @@ class App:
                 self.main_loop()
                 return
 
+    def ask_confirm(self, operation):
+        self.speaker.say(f'sei sicuro di voler {operation}?')
+        t = self.asr_module.transcribe_audio(3)
+        while not 'si' in t or 'no' in t:
+            self.speaker.say(f'non ho capito, sei sicuro di voler {operation}?')
+            t = self.asr_module.transcribe_audio(3)
+        if 'si' in t:
+            return True
+        return False
+
 
 # %%
 app = App()
 
 # %%
 app.main_loop()
-
