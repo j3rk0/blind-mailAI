@@ -231,7 +231,7 @@ class App:
     def ask_confirm(self, operation):
         self.speaker.say(f'sei sicuro di voler {operation}?')
         t = self.asr_module.transcribe_audio(3)
-        while not 'si' in t or 'no' in t:
+        while not ('si' in t or 'no' in t):
             self.speaker.say(f'non ho capito, sei sicuro di voler {operation}?')
             t = self.asr_module.transcribe_audio(3)
         if 'si' in t:
