@@ -6,11 +6,12 @@ It use a wav2vec2 + LM for asr, google cloud tts for
 voice and bert for understanding ( intent classification and token classification ).
 The system is trained with syntetic data. It use rdf for dialogue
 state tracking and smtp/pop3 to comunicating with email server.
-the system is in italian language only
+the system is in italian language only.
 
 ## Steps to build the AI pipeline:
 
-you can train your own system with the following step:
+to train your own system first create a python 3.8 virtual enviroment and
+install the requirements then follow these steps:
 
 
 #### Generate training data
@@ -55,7 +56,7 @@ and models/wav2vec2. you can also safely delete data/hfdata folder
 
 1) buil a email.conf file in the following format:
     
-   smtp_server:smtp_port
+    smtp_server:smtp_port
 
     pop3_server:pop3_port
        
