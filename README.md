@@ -47,9 +47,9 @@ and models/wav2vec2
        
     email:password
 
-2) build a conctact.txt with evrey row in the format (one for each contact in your library)
+2) build a contacts.txt with evrey row in the format (one for each contact in your library)
     
-    name:surname:email
+    name surname:email
 
 ## Start the app
 1) execute main.py

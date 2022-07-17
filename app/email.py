@@ -6,19 +6,26 @@ import poplib
 
 class EmailModule:
     def __init__(self):
-        self.user, pwd = 'nlp_testmail@libero.it', 'FrancoCutugno95!'
-        self.smtp_server = smtplib.SMTP_SSL('smtp.libero.it', 465)
+
+        with open('data/email.conf', 'r') as conf_file:
+            conf = conf_file.readlines()
+            sftp_server, sftp_port = conf[0].split(':')
+            pop3_server, pop3_port = conf[1].split(':')
+            self.user, pwd = conf[2].split(':')
+
+        self.smtp_server = smtplib.SMTP_SSL(sftp_server, sftp_port)
         self.smtp_server.ehlo()
         self.smtp_server.login(self.user, pwd)
 
-        self.pop3_server = poplib.POP3_SSL('popmail.libero.it', 995)
+        self.pop3_server = poplib.POP3_SSL(pop3_server, pop3_port)
         self.pop3_server.user(self.user)
         self.pop3_server.pass_(pwd)
 
-        self.person_db = {
-            'fulvio camera': 'fulvio.camera95@hotmail.com',
-            'riccardo arnese': 'riccardo.arnese@outlook.com'
-        }
+        with open('data/contacts.txt', 'r') as contancts_file:
+            self.person_db = {}
+            for contact in contancts_file.readlines():
+                person, email = contact.split(':')
+                self.person_db[person] = email
 
         self.mail_db = []
 
@@ -55,3 +62,5 @@ class EmailModule:
                 (time is None or any(
                     [i in mail['time']['month'] or i in mail['time']['day'] for i in time.split(' ')])) and \
                 (person is None or person in mail['person'])]
+
+# %%
