@@ -22,7 +22,7 @@ class EmailModule:
 
         self.mail_db = []
 
-        for i in range(1, len(self.pop3_server.list()[1])+1):
+        for i in range(1, len(self.pop3_server.list()[1]) + 1):
             m = self.pop3_server.retr(i)
             m = Parser().parsestr('\n'.join([t.decode() for t in m[1]]))
             curr = {'object': m.get('Subject'), 'time': {'day': 'diciannove', 'month': 'dicembre'},
@@ -32,6 +32,13 @@ class EmailModule:
 
     def dispatch_intent(self, intent):
         print(f"dispatching {intent}")
+
+        if intent == 'send_email':
+            for p in self.person_db.keys():
+                if intent['mail']['person'] in p:
+                    intent['mail']['person'] = self.person_db[p]
+                    break
+
         if intent['intent'] in ['send_email', 'reply_email', 'forward_email']:
             m = intent['mail']
             msg = EmailMessage()

@@ -34,4 +34,22 @@ and models/wav2vec2
 
 #### NER and Intent Classification
 
-1) coming soon...
+1) run train_token_clf notebook to train token classifier
+2) run train_seq_clf notebook to train intent classificator
+
+## Email Module
+
+1) buil a email.conf file in the following format:
+    
+   smtp_server:smtp_port
+
+    pop3_server:pop3_port
+       
+    email:password
+
+2) build a conctact.txt with evrey row in the format (one for each contact in your library)
+    
+    name:surname:email
+
+## Start the app
+1) execute main.py
