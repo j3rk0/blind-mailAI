@@ -27,8 +27,7 @@ class EmailModule:
             m = Parser().parsestr('\n'.join([t.decode() for t in m[1]]))
             curr = {'object': m.get('Subject'), 'time': {'day': 'diciannove', 'month': 'dicembre'},
                     'body': m.get_payload()[0].get_payload().split('_')[0],
-                    'person': self.person_db[m.get('From')] if m.get('From')
-                                                               in self.person_db.keys() else m.get('From')}
+                    'person': m.get('From')}
             self.mail_db.append(curr)
 
     def dispatch_intent(self, intent):
@@ -39,10 +38,7 @@ class EmailModule:
             msg.set_content(m['body'])
             msg['Subject'] = m['object']
             msg['From'] = self.user
-            if m['user'] in self.person_db.keys():
-                msg['To'] = self.person_db[m['user']]
-            else:
-                msg['To'] = m['user']
+            msg['To'] = self.person_db[m['user']].split(' ')[-1].replace('>', '').replace('<', '')
         elif intent['intent'] == 'delete_mail':
             self.mail_db.remove(intent['mail'])
 
