@@ -40,12 +40,11 @@ class EmailModule:
     def dispatch_intent(self, intent):
         print(f"dispatching {intent}")
 
-        if intent['intent'] == 'send_email':
+        if intent['intent'] in ['send_email','forward_email']:
             for p in self.person_db.keys():
                 if intent['mail']['person'] in p:
                     intent['mail']['person'] = self.person_db[p]
                     break
-
         if intent['intent'] in ['send_email', 'reply_email', 'forward_email']:
             m = intent['mail']
             msg = EmailMessage()
