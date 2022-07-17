@@ -32,7 +32,7 @@ class EmailModule:
 
     def dispatch_intent(self, intent):
         print(f"dispatching {intent}")
-        if intent['intent'] in ['send_email', 'reply_mail', 'forward_mail']:
+        if intent['intent'] in ['send_email', 'reply_email', 'forward_email']:
             m = intent['mail']
             msg = EmailMessage()
             msg.set_content(m['body'])
