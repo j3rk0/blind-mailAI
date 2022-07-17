@@ -1,14 +1,14 @@
 
+
 """ user = "nlp_testmail@libero.it"
 password = "FrancoCutugno95!" """
-
 
 # %%
 #import the smtplib library
 import smtplib
 
 # creating SMTP server
-server = smtplib.SMTP('smtp.libero.it ', 995)
+server = smtplib.SMTP_SSL('smtp.libero.it ', 465)
 
 # %% start server and use TLS for security
 server.ehlo()

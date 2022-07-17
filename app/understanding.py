@@ -29,4 +29,4 @@ class UnderstandingModule:
                 elif slot['label'][-4:] == 'DATE':
                     ret_slots.append(('date', slot['text']))
 
-        return intent,ret_slots
+        return intent, ret_slots

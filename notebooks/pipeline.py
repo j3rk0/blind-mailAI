@@ -31,6 +31,3 @@ intent = format_seqclf_result(intent_pipe(transcription))
 
 print(f" transcr: {transcription} \n tokens:{tokens} \n intent:{intent}")
 
-# %%
-
-import numpy as np
