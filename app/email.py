@@ -22,7 +22,7 @@ class EmailModule:
 
         self.mail_db = []
 
-        for i in range(1, len(self.pop3_server.list()[1])):
+        for i in range(1, len(self.pop3_server.list()[1])+1):
             m = self.pop3_server.retr(i)
             m = Parser().parsestr('\n'.join([t.decode() for t in m[1]]))
             curr = {'object': m.get('Subject'), 'time': {'day': 'diciannove', 'month': 'dicembre'},
