@@ -70,20 +70,20 @@ class App:
             if intent == 'send_email' and len(self.opened_mail) == 0:
                 self.speaker.say('invio una mail')
                 self.graph_module.exchange('System', 'invio una mail')
-                mail = {'object': None, 'user': None, 'body': None}
+                mail = {'object': None, 'person': None, 'body': None}
                 for slot in slots:
                     if slot[0] == 'object':
                         mail['object'] = slot[1]
                     elif slot[0] == 'person':
-                        mail['user'] = slot[1]
+                        mail['person'] = slot[1]
                 self.graph_module.exchange('User', text, intent, slots)
                 for field in mail.keys():
                     if mail[field] is None:
-                        if field == 'user':
+                        if field == 'person':
                             self.speaker.say('a chi va inviato?')
                             self.graph_module.exchange('System', 'a chi va inviato?')
-                            mail['user'] = self.asr_module.transcribe_audio()
-                            self.graph_module.exchange('User', mail['user'], None, [('person', mail['user'])])
+                            mail['person'] = self.asr_module.transcribe_audio()
+                            self.graph_module.exchange('User', mail['person'], None, [('person', mail['person'])])
 
                         elif field == 'object':
                             self.speaker.say('qual\' è l\' ogetto?')
