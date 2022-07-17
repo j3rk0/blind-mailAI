@@ -13,11 +13,11 @@ class EmailModule:
             pop3_server, pop3_port = conf[1].split(':')
             self.user, pwd = conf[2].split(':')
 
-        self.smtp_server = smtplib.SMTP_SSL(sftp_server, sftp_port)
+        self.smtp_server = smtplib.SMTP_SSL(sftp_server, int(sftp_port))
         self.smtp_server.ehlo()
         self.smtp_server.login(self.user, pwd)
 
-        self.pop3_server = poplib.POP3_SSL(pop3_server, pop3_port)
+        self.pop3_server = poplib.POP3_SSL(pop3_server, int(pop3_port))
         self.pop3_server.user(self.user)
         self.pop3_server.pass_(pwd)
 
@@ -40,7 +40,7 @@ class EmailModule:
     def dispatch_intent(self, intent):
         print(f"dispatching {intent}")
 
-        if intent == 'send_email':
+        if intent['intent'] == 'send_email':
             for p in self.person_db.keys():
                 if intent['mail']['person'] in p:
                     intent['mail']['person'] = self.person_db[p]
