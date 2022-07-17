@@ -39,6 +39,7 @@ class EmailModule:
             msg['Subject'] = m['object']
             msg['From'] = self.user
             msg['To'] = self.person_db[m['user']].split(' ')[-1].replace('>', '').replace('<', '')
+            self.smtp_server.send_message(msg)
         elif intent['intent'] == 'delete_mail':
             self.mail_db.remove(intent['mail'])
 
