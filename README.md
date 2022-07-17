@@ -1,22 +1,18 @@
 # ASR dialogue system for email managing
 
-## current state:
-
-build model for ASR use finetuned on a domain-specific small dataset of
-text-to-speech generated mp3 files.
-as extra dependency you need ffmpeg and also check requirements from kenlm
-if you want to generate the LM by yourself
-
-### Steps to build the AI pipeline:
+## Steps to build the AI pipeline:
 
 #### Generate training data
 
 1) create python 3.8 virtualenv with requirements
 2) write a file in data/names.txt with some rows in the format:
-name,surname with random names and surnames. you must have also a google api tts
-auth key saved as data/tts_auth_key.json
+
+   name,surname
+
+   with random names and surnames. you must have also a google api tts
+   auth key saved as data/tts_auth_key.json
 3) run generate_dataset notebook. this will create a data/dataset.csv file 
-and a data/audio folder.
+   and a data/audio folder.
 
 
 #### ASR fine tuning:
@@ -39,7 +35,7 @@ and models/wav2vec2
 1) run train_token_clf notebook to train token classifier
 2) run train_seq_clf notebook to train intent classificator
 
-## Email Module
+#### Email Module
 
 1) buil a email.conf file in the following format:
     

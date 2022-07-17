@@ -28,5 +28,7 @@ class ASRModule:
         sd.wait()
 
         print('elaboro risposta')
-        return format_asr_result(self.pipe(myrecording.T[0]))
+        ret = format_asr_result(self.pipe(myrecording.T[0]))
+        print(ret)
+        return ret
 

@@ -9,11 +9,11 @@ class EmailModule:
 
         with open('data/email.conf', 'r') as conf_file:
             conf = conf_file.readlines()
-            sftp_server, sftp_port = conf[0].replace('\n', '').split(':')
+            smtp_server, smtp_port = conf[0].replace('\n', '').split(':')
             pop3_server, pop3_port = conf[1].replace('\n', '').split(':')
             self.user, pwd = conf[2].split(':')
 
-        self.smtp_server = smtplib.SMTP_SSL(sftp_server, int(sftp_port))
+        self.smtp_server = smtplib.SMTP_SSL(smtp_server, int(smtp_port))
         self.smtp_server.ehlo()
         self.smtp_server.login(self.user, pwd)
 
