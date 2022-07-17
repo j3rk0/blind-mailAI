@@ -9,8 +9,8 @@ class EmailModule:
 
         with open('data/email.conf', 'r') as conf_file:
             conf = conf_file.readlines()
-            sftp_server, sftp_port = conf[0].split(':')
-            pop3_server, pop3_port = conf[1].split(':')
+            sftp_server, sftp_port = conf[0].replace('\n', '').split(':')
+            pop3_server, pop3_port = conf[1].replace('\n', '').split(':')
             self.user, pwd = conf[2].split(':')
 
         self.smtp_server = smtplib.SMTP_SSL(sftp_server, int(sftp_port))
@@ -24,7 +24,7 @@ class EmailModule:
         with open('data/contacts.txt', 'r') as contancts_file:
             self.person_db = {}
             for contact in contancts_file.readlines():
-                person, email = contact.split(':')
+                person, email = contact.replace('\n', '').split(':')
                 self.person_db[person] = email
 
         self.mail_db = []

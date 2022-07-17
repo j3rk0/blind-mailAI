@@ -10,17 +10,19 @@ if you want to generate the LM by yourself
 ### Steps to build the AI pipeline:
 
 #### Generate training data
-1) write a file in data/names.txt with some rows in the format:
+
+1) create python 3.8 virtualenv with requirements
+2) write a file in data/names.txt with some rows in the format:
 name,surname with random names and surnames. you must have also a google api tts
 auth key saved as data/tts_auth_key.json
-2) run generate_dataset notebook. this will create a data/dataset.csv file 
+3) run generate_dataset notebook. this will create a data/dataset.csv file 
 and a data/audio folder.
 
 
 #### ASR fine tuning:
 
-1) create python 3.8 virtualenv with requirements
-3) run fine tuning notebook. this will get you a models/wav2vec2 folder with torch model
+
+1) run fine tuning notebook. this will get you a models/wav2vec2 folder with torch model
 
 #### LM generation:
 
