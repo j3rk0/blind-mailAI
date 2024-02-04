@@ -31,7 +31,7 @@ install the requirements then follow these steps:
 #### ASR fine tuning:
 
 
-1) run fine tuning notebook. this will get you a models/wav2vec2 folder with torch model
+1) run fine tuning notebook (notebook/asr/train_asr.py). this will get you a models/wav2vec2 folder with torch model
 2) you can now safely delete data/audio and data/hfdata folders
 
 #### LM generation:
@@ -39,16 +39,16 @@ install the requirements then follow these steps:
 1) from command line cd into lib and run get_lm_corpus.sh this will get you
 200 mb of data from paisa italian corpus in data/lm/corpus.txt
 2) cd into lib/lm and run get_kenlm.sh to get kenlm executables
-3) run build_lm.sh this will generate a lm model in models/lm/lm.arpa
+3) run notebooks/asr/build_lm.sh this will generate a lm model in models/lm/lm.arpa
 4) run build_asr_with_lm notebook to generate a model in models/wav2vec2LM
-5) if you run infer_asr you get the result of asr with lm. you can safely delete models/lm 
+5) if you run notebooks/asr/infer_asr you get the result of asr with lm. you can safely delete models/lm 
 and models/wav2vec2. you can also safely delete data/hfdata folder
 
 #### Tokens and Intent Classification
 
-1) run train_token_clf notebook to train token classifier. this will
+1) run notebooks/bert/train_token_clf.py notebook to train token classifier. this will
    get you a model/bert4token and model/berttokenizer folders with pytorch models
-2) run train_seq_clf notebook to train intent classificator. this will
+2) run notebooks/bert/train_seq_clf.py notebook to train intent classificator. this will
    get you a model/bert4sequence folder with the pytorch model
 3) now you can safely delete data/dataset.csv
 
